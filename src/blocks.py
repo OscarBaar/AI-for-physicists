@@ -1,5 +1,25 @@
-import torch.nn as nn
+import warnings # ignore future warnings for now
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
+from pathlib import Path # Path library
+
+import numpy as np # numpy library
+import pandas as pd # pandas library
+import seaborn as sns # seaborn library for plotting figures
+
+import torch # pytorch library
+import torch.nn as nn # neural network module
+import torch.optim as optim # optimization module
+from torch.utils.data import DataLoader # data loader module
+import torchvision.transforms as transforms # image transforms module
+
+from matplotlib import pyplot as plt # plotting library
+from IPython.core.display import SVG # display SVG images in Jupyter
+from tqdm import tqdm, trange # progress bar library
+
+
+# set seaborn style to no grid and white background
+sns.set(style='white', rc={'axes.grid': False})
 
 class Encoder(nn.Module):
     """A simple encoder without any normalization block"""
@@ -122,3 +142,5 @@ class Autoencoder(nn.Module):
         x_hat = self.decoder.forward(latent)
 
         return x_hat
+
+
