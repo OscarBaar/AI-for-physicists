@@ -28,6 +28,7 @@ class Encoder(nn.Module):
                  num_input_channels: int,
                  base_channel_size: int,
                  latent_dim: int,
+                 data_size: int,
                  act_fn: object = nn.GELU):
         """
         Initialize an Encoder object.
@@ -54,7 +55,8 @@ class Encoder(nn.Module):
             act_fn(),
             nn.Flatten(),
         )
-        self.linear = nn.Linear(2 * self.size ** 2 * c_hid, latent_dim)
+        self.reduced_size = self.compute_output_size(data_size)
+        self.linear = nn.Linear(2 * self.reduced_size ** 2 * c_hid, latent_dim)
 
     def compute_output_size(self, input_size):
         output_size = input_size
@@ -65,10 +67,8 @@ class Encoder(nn.Module):
         return output_size
 
     def forward(self, x):
-        net = self.net(x)
-        self.size = self.compute_output_size(x.shape[0])
-        latent = nn.Linear(net, 2 * self.size ** 2 * self.c_hid, self.latent_dim)
-        return latent
+
+        return self.net(x)
 
 
 class Decoder(nn.Module):
@@ -78,6 +78,7 @@ class Decoder(nn.Module):
                  num_input_channels: int,
                  base_channel_size: int,
                  latent_dim: int,
+                 data_size: int,
                  act_fn: object = nn.GELU):
         """
         Initialize a Decoder object.
@@ -90,9 +91,8 @@ class Decoder(nn.Module):
         """
         super().__init__()
         c_hid = base_channel_size
-        self.size = None
         self.linear = nn.Sequential(
-            nn.Linear(latent_dim, 2 * self.size ** 2 * c_hid),
+            nn.Linear(latent_dim, 2 * data_size ** 2 * c_hid),
             act_fn()
         )
         self.net = nn.Sequential(
@@ -109,9 +109,8 @@ class Decoder(nn.Module):
         )
 
     def forward(self, x):
-        self.size = x.shape[0]
         x = self.linear(x)
-        x = x.reshape(x.shape[0], -1, self.size, self.size)
+        x = x.reshape(x.shape[0], -1, self.data_size, self.data_size)
         x = self.net(x)
         return x
 
@@ -123,6 +122,7 @@ class Autoencoder(nn.Module):
                  num_input_channels: int,
                  base_channel_size: int,
                  latent_dim: int,
+                 data_size: int = 32,
                  act_fn: object = nn.GELU):
         """
         Initialize an Autoencoder object.
@@ -134,13 +134,13 @@ class Autoencoder(nn.Module):
 
         """
         super().__init__()
-        self.encoder = Encoder(num_input_channels, base_channel_size, latent_dim, act_fn)
-        self.decoder = Decoder(num_input_channels, base_channel_size, latent_dim, act_fn)
+        self.encoder = Encoder(num_input_channels, base_channel_size, latent_dim, data_size, act_fn)
+        reduced_size = self.encoder.reduced_size
+        self.decoder = Decoder(num_input_channels, base_channel_size, latent_dim, reduced_size, act_fn)
 
     def forward(self, x):
         latent = self.encoder.forward(x)
         x_hat = self.decoder.forward(latent)
-
         return x_hat
 
 
