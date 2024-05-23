@@ -21,6 +21,7 @@ from tqdm import tqdm, trange # progress bar library
 # set seaborn style to no grid and white background
 sns.set(style='white', rc={'axes.grid': False})
 
+
 class Encoder(nn.Module):
     """A simple encoder without any normalization block"""
 
@@ -36,11 +37,10 @@ class Encoder(nn.Module):
         :param num_input_channels: Number of input channels
         :param base_channel_size: Number of channels in the first layer
         :param latent_dim: Number of channels in the last layer
+        :param data_size: Size of the input data
         :param act_fn: Activation function to use
-
         """
         super().__init__()
-        self.size = None
         c_hid = base_channel_size
         self.net = nn.Sequential(
             nn.Conv2d(num_input_channels, c_hid, kernel_size=3, padding=1, stride=2),
@@ -67,8 +67,8 @@ class Encoder(nn.Module):
         return output_size
 
     def forward(self, x):
-
-        return self.net(x)
+        x = self.net(x)
+        return self.linear(x)
 
 
 class Decoder(nn.Module):
@@ -86,11 +86,12 @@ class Decoder(nn.Module):
         :param num_input_channels: Number of input channels
         :param base_channel_size: Number of channels in the first layer
         :param latent_dim: Number of channels in the last layer
+        :param data_size: Size of the input data
         :param act_fn: Activation function to use
-
         """
         super().__init__()
         c_hid = base_channel_size
+        self.data_size = data_size
         self.linear = nn.Sequential(
             nn.Linear(latent_dim, 2 * data_size ** 2 * c_hid),
             act_fn()
@@ -130,8 +131,8 @@ class Autoencoder(nn.Module):
         :param num_input_channels: Number of input channels
         :param base_channel_size: Number of channels in the first layer
         :param latent_dim: Number of channels in the last layer
+        :param data_size: Size of the input data
         :param act_fn: Activation function to use
-
         """
         super().__init__()
         self.encoder = Encoder(num_input_channels, base_channel_size, latent_dim, data_size, act_fn)
@@ -142,5 +143,3 @@ class Autoencoder(nn.Module):
         latent = self.encoder.forward(x)
         x_hat = self.decoder.forward(latent)
         return x_hat
-
-
