@@ -45,7 +45,7 @@ class DataGenerator(torch.utils.data.Dataset):
         # Generate data.
         X,y= self.__data_generation(list_IDs_temp)
 
-        return X,y
+        return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
 
     def __data_generation(self, list_IDs_temp):
@@ -56,10 +56,11 @@ class DataGenerator(torch.utils.data.Dataset):
         for i,list_ID in enumerate(list_IDs_temp):
             # Store sample
             file = np.load(os.path.join(self.path, list_ID))
+            print(file.shape)
             
             X[i,] = (file - self.x_min) / (self.x_max - self.x_min)
             y[i,] = (file - self.x_min) / (self.x_max - self.x_min)
 
         
 
-        return np.expand_dims(X, axis=-1), np.expand_dims(y, axis=-1)
+        return X,y

@@ -122,32 +122,15 @@ class Decoder(nn.Module):
 
 
 class Autoencoder(nn.Module):
-    """A simple autoencoder"""
-
-    def __init__(self,
-                 num_input_channels: int,
-                 base_channel_size: int,
-                 latent_dim: int,
-                 data_size: int = 32,
-                 act_fn: object = nn.GELU):
-        """
-        Initialize an Autoencoder object.
-
-        :param num_input_channels: Number of input channels
-        :param base_channel_size: Number of channels in the first layer
-        :param latent_dim: Number of channels in the last layer
-        :param data_size: Size of the input data
-        :param act_fn: Activation function to use
-        """
-        super().__init__()
-        self.encoder = Encoder(num_input_channels, base_channel_size, latent_dim, data_size, act_fn)
-        reduced_size = self.encoder.reduced_size
-        self.decoder = Decoder(num_input_channels, base_channel_size, latent_dim, reduced_size, act_fn)
+    def __init__(self, encoder, decoder):
+        super(Autoencoder, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
 
     def forward(self, x):
-        latent = self.encoder.forward(x)
-        x_hat = self.decoder.forward(latent)
-        return x_hat
+        latent_space = self.encoder(x)
+        reconstructed = self.decoder(latent_space)
+        return reconstructed
 
 
 class ConvEncoder(nn.Module):
@@ -179,30 +162,31 @@ class ConvEncoder(nn.Module):
         self.activation = nn.ReLU()
 
 
-    def forward(self, tokens, energy_token):
+    def forward(self, tokens):
         # First convolutional block
         x = self.conv1(tokens)
         x = self.norm1(x)
         x = self.activation(x)
         x = self.pool(x)
+        print(x.shape)
 
         # Second convolutional block
         x = self.conv2(x)
         x = self.norm2(x)
         x = self.activation(x)
         x = self.pool(x)
-
+        print(x.shape)
         # Third convolutional block
         x = self.conv3(x)
         x = self.norm3(x)
         x = self.activation(x)
         x = self.pool(x)
-
+        print(x.shape)
         # Final convolutional block
         x = self.conv4(x)
         x = self.norm4(x)
         x = self.activation(x)
-
+        print(x.shape)
         # Reshape and concatenate operations
         return x
 
@@ -219,21 +203,24 @@ class ConvDecoder(nn.Module):
         # Convolutional transpose layers
         self.conv1 = nn.ConvTranspose2d(self.num_channels, self.num_channels,
                                         kernel_size=self.kernel_size,
-                                        stride=self.strides,
+                                        stride=2,
                                         padding=self.kernel_size//2,
+                                        output_padding=1,
                                         bias=False)
         self.conv2 = nn.ConvTranspose2d(self.num_channels, self.num_channels,
                                         kernel_size=self.kernel_size,
-                                        stride=self.strides,
+                                        stride=2,
                                         padding=self.kernel_size//2,
+                                        output_padding=1,
                                         bias=False)
         self.conv3 = nn.ConvTranspose2d(self.num_channels, self.num_channels,
                                         kernel_size=self.kernel_size,
-                                        stride=self.strides,
+                                        stride=2,
                                         padding=self.kernel_size//2,
+                                        output_padding=1,
                                         bias=False)
         
-        # Output convolution
+        # Output convolution to match the input channels (1 in this case)
         self.conv4 = nn.Conv2d(self.num_channels, 1,
                                kernel_size=self.kernel_size,
                                padding=self.kernel_size//2)
@@ -250,15 +237,20 @@ class ConvDecoder(nn.Module):
 
     def forward(self, x):
         # First convolutional block
+
+        print(x.shape)
         x = self.h1(self.norm1(self.conv1(x)))
-        
+        print(x.shape)
         # Second convolutional block
         x = self.h2(self.norm2(self.conv2(x)))
+        print(x.shape)
 
         # Third convolutional block
         x = self.h3(self.norm3(self.conv3(x)))
+        print(x.shape)
 
         # Output convolution
         x = self.conv4(x)
-        
+        print(x.shape)
+
         return x
