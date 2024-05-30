@@ -35,7 +35,7 @@ def plot_2d_slice(data, slice_number):
 
     """
     plt.imshow(data[slice_number+1], cmap='gray')
-    plt.title(f'Slice {slice_number+1} of the CT Scan')
+    plt.title(f'Slice {slice_number} of the CT Scan')
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.show()
