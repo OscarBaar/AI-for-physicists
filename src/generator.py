@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 def load_img(file_path, noise_mean=0, noise_std=0.01):
     """
     Load a .npy file, apply a random rotation (90, 180, 270 degrees),
