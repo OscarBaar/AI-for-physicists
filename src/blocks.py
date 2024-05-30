@@ -5,22 +5,22 @@ from pathlib import Path # Path library
 
 import numpy as np # numpy library
 import pandas as pd # pandas library
+import seaborn as sns # seaborn library for plotting figures
 import random
 
 import torch # pytorch library
 import torch.nn as nn # neural network module
-# import torch.optim as optim # optimization module
-# from torch.utils.data import DataLoader # data loader module
-# import torchvision.transforms as transforms # image transforms module
-#
-# from matplotlib import pyplot as plt # plotting library
-# from IPython.core.display import SVG # display SVG images in Jupyter
-# from tqdm import tqdm, trange # progress bar library
+import torch.optim as optim # optimization module
+from torch.utils.data import DataLoader # data loader module
+import torchvision.transforms as transforms # image transforms module
+
+from matplotlib import pyplot as plt # plotting library
+from IPython.core.display import SVG # display SVG images in Jupyter
+from tqdm import tqdm, trange # progress bar library
 
 
 # set seaborn style to no grid and white background
-# import seaborn as sns # seaborn library for plotting figures
-# sns.set(style='white', rc={'axes.grid': False})
+sns.set(style='white', rc={'axes.grid': False})
 
 
 class Encoder(nn.Module):

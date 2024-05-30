@@ -1,9 +1,4 @@
-import random
-import torch
-import os
-import numpy as np
 import matplotlib.pyplot as plt
-
 
 def load_img(file_path, noise_mean=0, noise_std=0.01):
     """
@@ -26,7 +21,6 @@ def load_img(file_path, noise_mean=0, noise_std=0.01):
 
     noisy_scan = scan + noise
     tensor_scan = torch.tensor(noisy_scan, dtype=torch.float32).unsqueeze(0)
-    del scan, noise, noisy_scan
 
     return tensor_scan
 
@@ -45,14 +39,3 @@ def plot_2d_slice(data, slice_number):
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.show()
-
-
-if __name__ == '__main__':
-    folder = "../lung_cts/"
-    for file in os.listdir(folder):
-        if not file.endswith(".npy"):
-            continue
-
-        scan = np.load(folder+file)
-        plot_2d_slice(scan, 50)
-        del scan
