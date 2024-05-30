@@ -3,8 +3,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from pathlib import Path # Path library
 
-import numpy as np # numpy library
-import pandas as pd # pandas library
+import numpy as np
+import pandas as pd
 import random
 
 import torch # pytorch library
