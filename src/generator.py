@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import random
 import os
 
-
 def load_img(file_path, noise_mean=0, noise_std=0.01):
     """
     Load a .npy file, apply a random rotation (90, 180, 270 degrees),
@@ -47,11 +46,12 @@ def plot_2d_slice(data, slice_number):
 
 
 if __name__ == '__main__':
-    folder = "../lung_cts/"
+    folder = r"lung_cts/"
     for file in os.listdir(folder):
         if not file.endswith(".npy"):
             continue
 
-        scan = np.load(folder+file)
+        scan = np.load(os.path.join(folder,file))
         plot_2d_slice(scan, 50)
         del scan
+
