@@ -7,6 +7,10 @@ import numpy as np
 import pandas as pd
 import random
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 import torch # pytorch library
 import torch.nn as nn # neural network module
 # import torch.optim as optim # optimization module
@@ -148,10 +152,9 @@ class Autoencoder(nn.Module):
 
 class ConvEncoder(nn.Module):
     """Learnable position embedding + initial projection."""
-    def __init__(self, num_tokens, projection_dim, num_channels=64, kernel_size=5, strides=1, pooling=2):
+    def __init__(self, num_channels=64, kernel_size=5, strides=1, pooling=2):
         super(ConvEncoder, self).__init__()
-        self.num_tokens = num_tokens
-        self.projection_dim = projection_dim
+
         self.num_channels = num_channels
         self.kernel_size = kernel_size
         self.strides = strides
@@ -161,7 +164,7 @@ class ConvEncoder(nn.Module):
         self.conv1 = nn.Conv2d(1, num_channels, kernel_size, stride=strides, padding=kernel_size//2, bias=False)
         self.conv2 = nn.Conv2d(num_channels, num_channels, kernel_size, stride=strides, padding=kernel_size//2, bias=False)
         self.conv3 = nn.Conv2d(num_channels, num_channels, kernel_size, stride=strides, padding=kernel_size//2, bias=False)
-        self.conv4 = nn.Conv2d(num_channels, projection_dim, kernel_size, stride=strides, padding=kernel_size//2, bias=False)
+        self.conv4 = nn.Conv2d(num_channels, num_channels, kernel_size, stride=strides, padding=kernel_size//2, bias=False)
 
         # Pooling layers
         self.pool = nn.MaxPool2d(pooling, stride=pooling)
@@ -170,21 +173,11 @@ class ConvEncoder(nn.Module):
         self.norm1 = nn.GroupNorm(16, num_channels)
         self.norm2 = nn.GroupNorm(16, num_channels)
         self.norm3 = nn.GroupNorm(4, num_channels)
-        self.norm4 = nn.GroupNorm(4, projection_dim)
+        self.norm4 = nn.GroupNorm(4, num_channels)
 
         # Activation layers
         self.activation = nn.ReLU()
 
-        # Flatten 3D slices to 1D vectors
-        self.flatten = nn.Flatten()
-
-        # Positional encoding
-        self.position_embedding = nn.Embedding(num_tokens, projection_dim)
-
-        # Linear transformation of the energy
-        self.linear = nn.Linear(projection_dim, projection_dim)
-        self.reshape = lambda x: x.view(-1, 1, self.projection_dim)
-        self.concat = nn.Concatenate(dim=1)
 
     def forward(self, tokens, energy_token):
         # First convolutional block
@@ -211,8 +204,61 @@ class ConvEncoder(nn.Module):
         x = self.activation(x)
 
         # Reshape and concatenate operations
-        x = self.flatten(x)
-        x = self.reshape(x)
-        x = self.concat([x, energy_token])
+        return x
 
+
+class ConvDecoder(nn.Module):
+    """Convert transformer output to dose."""
+    def __init__(self, num_channels=64, kernel_size=5, strides=2):
+        super(ConvDecoder, self).__init__()
+
+        self.num_channels = num_channels
+        self.kernel_size = kernel_size
+        self.strides = strides
+        
+        # Convolutional transpose layers
+        self.conv1 = nn.ConvTranspose2d(self.num_channels, self.num_channels,
+                                        kernel_size=self.kernel_size,
+                                        stride=self.strides,
+                                        padding=self.kernel_size//2,
+                                        bias=False)
+        self.conv2 = nn.ConvTranspose2d(self.num_channels, self.num_channels,
+                                        kernel_size=self.kernel_size,
+                                        stride=self.strides,
+                                        padding=self.kernel_size//2,
+                                        bias=False)
+        self.conv3 = nn.ConvTranspose2d(self.num_channels, self.num_channels,
+                                        kernel_size=self.kernel_size,
+                                        stride=self.strides,
+                                        padding=self.kernel_size//2,
+                                        bias=False)
+        
+        # Output convolution
+        self.conv4 = nn.Conv2d(self.num_channels, 1,
+                               kernel_size=self.kernel_size,
+                               padding=self.kernel_size//2)
+        
+        # Normalization layers
+        self.norm1 = nn.GroupNorm(num_groups=16, num_channels=self.num_channels)
+        self.norm2 = nn.GroupNorm(num_groups=16, num_channels=self.num_channels)
+        self.norm3 = nn.GroupNorm(num_groups=16, num_channels=self.num_channels)
+
+        # Activation layers
+        self.h1 = nn.ReLU()
+        self.h2 = nn.ReLU()
+        self.h3 = nn.ReLU()
+
+    def forward(self, x):
+        # First convolutional block
+        x = self.h1(self.norm1(self.conv1(x)))
+        
+        # Second convolutional block
+        x = self.h2(self.norm2(self.conv2(x)))
+
+        # Third convolutional block
+        x = self.h3(self.norm3(self.conv3(x)))
+
+        # Output convolution
+        x = self.conv4(x)
+        
         return x

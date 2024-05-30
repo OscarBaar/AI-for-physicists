@@ -1,16 +1,22 @@
 import numpy as np
 import torch
+from src.blocks import ConvEncoder, ConvDecoder
 
 
-def mse_loss_fn(pred: torch.Tensor, gt: torch.Tensor):
-    """
-    The MSE error
-    Parameters:
-    pred (torch.Tensor): The reconstructed output from the autoencoder.
-    gt (torch.Tensor): The original input to the autoencoder.
 
-    Returns:
-    torch.Tensor: The mean squared error loss of the autoencoder
-    """
-    mse = np.mean((pred - gt) ** 2)
-    return mse
+def autoencoder(input_shape=(1,400,400),kernel_size=5):
+    
+    input_shape = input_shape
+    kernel_size = kernel_size
+
+
+    inputs= torch.nn.Input(input_shape)
+
+    latent_space= ConvEncoder(inputs, kernel_size=kernel_size)
+
+    outputs = ConvDecoder(latent_space, kernel_size=kernel_size)
+
+
+    model = torch.nn.Model(inputs, outputs)
+    return model
+
