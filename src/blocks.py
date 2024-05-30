@@ -144,3 +144,75 @@ class Autoencoder(nn.Module):
         latent = self.encoder.forward(x)
         x_hat = self.decoder.forward(latent)
         return x_hat
+
+
+class ConvEncoder(nn.Module):
+    """Learnable position embedding + initial projection."""
+    def __init__(self, num_tokens, projection_dim, num_channels=64, kernel_size=5, strides=1, pooling=2):
+        super(ConvEncoder, self).__init__()
+        self.num_tokens = num_tokens
+        self.projection_dim = projection_dim
+        self.num_channels = num_channels
+        self.kernel_size = kernel_size
+        self.strides = strides
+        self.pooling = pooling
+
+        # Convolutional layers
+        self.conv1 = nn.Conv2d(1, num_channels, kernel_size, stride=strides, padding=kernel_size//2, bias=False)
+        self.conv2 = nn.Conv2d(num_channels, num_channels, kernel_size, stride=strides, padding=kernel_size//2, bias=False)
+        self.conv3 = nn.Conv2d(num_channels, num_channels, kernel_size, stride=strides, padding=kernel_size//2, bias=False)
+        self.conv4 = nn.Conv2d(num_channels, projection_dim, kernel_size, stride=strides, padding=kernel_size//2, bias=False)
+
+        # Pooling layers
+        self.pool = nn.MaxPool2d(pooling, stride=pooling)
+
+        # Normalization layers
+        self.norm1 = nn.GroupNorm(16, num_channels)
+        self.norm2 = nn.GroupNorm(16, num_channels)
+        self.norm3 = nn.GroupNorm(4, num_channels)
+        self.norm4 = nn.GroupNorm(4, projection_dim)
+
+        # Activation layers
+        self.activation = nn.ReLU()
+
+        # Flatten 3D slices to 1D vectors
+        self.flatten = nn.Flatten()
+
+        # Positional encoding
+        self.position_embedding = nn.Embedding(num_tokens, projection_dim)
+
+        # Linear transformation of the energy
+        self.linear = nn.Linear(projection_dim, projection_dim)
+        self.reshape = lambda x: x.view(-1, 1, self.projection_dim)
+        self.concat = nn.Concatenate(dim=1)
+
+    def forward(self, tokens, energy_token):
+        # First convolutional block
+        x = self.conv1(tokens)
+        x = self.norm1(x)
+        x = self.activation(x)
+        x = self.pool(x)
+
+        # Second convolutional block
+        x = self.conv2(x)
+        x = self.norm2(x)
+        x = self.activation(x)
+        x = self.pool(x)
+
+        # Third convolutional block
+        x = self.conv3(x)
+        x = self.norm3(x)
+        x = self.activation(x)
+        x = self.pool(x)
+
+        # Final convolutional block
+        x = self.conv4(x)
+        x = self.norm4(x)
+        x = self.activation(x)
+
+        # Reshape and concatenate operations
+        x = self.flatten(x)
+        x = self.reshape(x)
+        x = self.concat([x, energy_token])
+
+        return x
