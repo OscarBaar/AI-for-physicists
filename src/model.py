@@ -6,7 +6,7 @@ def mse_loss_fn(pred: torch.Tensor, gt: torch.Tensor):
       gt (torch.Tensor): The original input to the autoencoder.
 
       Returns:
-      torch.Tensor: The mean squared error loss.
+      torch.Tensor: The mean squared error loss of the autoencoder
       """
       mse = (pred - gt)**2
       return mse.mean()
