@@ -1,4 +1,9 @@
+import torch
+import numpy as np
 import matplotlib.pyplot as plt
+import random
+import os
+
 
 def load_img(file_path, noise_mean=0, noise_std=0.01):
     """
@@ -39,3 +44,14 @@ def plot_2d_slice(data, slice_number):
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.show()
+
+
+if __name__ == '__main__':
+    folder = "../lung_cts/"
+    for file in os.listdir(folder):
+        if not file.endswith(".npy"):
+            continue
+
+        scan = np.load(folder+file)
+        plot_2d_slice(scan, 50)
+        del scan
