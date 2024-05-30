@@ -21,3 +21,19 @@ def load_img(file_path, noise_mean=0, noise_std=0.01):
     tensor_scan = torch.tensor(noisy_scan, dtype=torch.float32).unsqueeze(0)
 
     return tensor_scan
+
+
+def plot_2d_slice(data, slice_number):
+    """
+    Plot a 2D slice of a 3D CT scan.
+
+    Parameters:
+    data (numpy.ndarray): The 3D CT scan data.
+    slice_number (int): The slice number to be plotted.
+
+    """
+    plt.imshow(data[slice_number+1], cmap='gray')
+    plt.title(f'Slice {slice_number+1} of the CT Scan')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.show()
