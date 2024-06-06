@@ -62,25 +62,21 @@ class ConvEncoder(nn.Module):
         x = self.norm1(x)
         x = self.activation(x)
         x = self.pool(x)
-        print(x.shape)
 
         # Second convolutional block
         x = self.conv2(x)
         x = self.norm2(x)
         x = self.activation(x)
         x = self.pool(x)
-        print(x.shape)
         # Third convolutional block
         x = self.conv3(x)
         x = self.norm3(x)
         x = self.activation(x)
         x = self.pool(x)
-        print(x.shape)
         # Final convolutional block
         x = self.conv4(x)
         x = self.norm4(x)
         x = self.activation(x)
-        print(x.shape)
         # Reshape and concatenate operations
         return x
 
@@ -132,19 +128,24 @@ class ConvDecoder(nn.Module):
     def forward(self, x):
         # First convolutional block
 
-        print(x.shape)
         x = self.h1(self.norm1(self.conv1(x)))
-        print(x.shape)
         # Second convolutional block
         x = self.h2(self.norm2(self.conv2(x)))
-        print(x.shape)
 
         # Third convolutional block
         x = self.h3(self.norm3(self.conv3(x)))
-        print(x.shape)
 
         # Output convolution
         x = self.conv4(x)
-        print(x.shape)
 
         return x
+class Autoencoder(nn.Module):
+    def __init__(self, encoder, decoder):
+        super(Autoencoder, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+
+    def forward(self, x):
+        latent_space = self.encoder(x)
+        reconstructed = self.decoder(latent_space)
+        return reconstructed
