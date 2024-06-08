@@ -28,7 +28,7 @@ class DataGenerator(Dataset):
 
     def __len__(self):
         # Calculates the number of batches per epoch.
-        return int(np.floor(len(self.list_IDs) / self.batch_size))
+       return int(np.floor(len(self.list_IDs) / self.batch_size))
 
     def __getitem__(self, index):
         # Generate one batch of data.
@@ -52,12 +52,12 @@ class DataGenerator(Dataset):
         for i, list_ID in enumerate(list_IDs_temp):
             try:
                 file_path = os.path.join(self.path, list_ID)
-                if not os.path.isfile(file_path):
-                    print(f'File {file_path} does not exist.')
-                    continue
-
+                num_rot= np.random.randint(0, 3)
                 # Store sample
                 file = np.load(file_path)
+
+                file= np.rot90(file, num_rot)
+                
 
                 X[i,] = (file - self.x_min) / (self.x_max - self.x_min)
                 y[i,] = (file - self.x_min) / (self.x_max - self.x_min)

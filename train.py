@@ -1,17 +1,19 @@
 import os
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-
+import pickle
 from src.generator_correct import DataGenerator
 from src.blocks import Autoencoder, ConvDecoder, ConvEncoder
+from torch.optim.lr_scheduler import StepLR
 
-batch_size = 20
-num_epochs = 1
+batch_size = 10
+num_epochs = 50
 
 path = r"data_2d"
 data_df = pd.read_csv(os.path.join(path, "file_info.csv"))
@@ -42,8 +44,8 @@ encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
 decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
 model = Autoencoder(encoder, decoder)
 criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
+optimizer = optim.Adam(model.parameters(), lr=5e-3)
+scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
 # Move the model to GPU idx 2
 device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 model.to(device)
@@ -53,58 +55,63 @@ best_model_path = 'best_model.pth'
 
 print(f'Number of training batches: {len(train_gen)}')
 print(f'Number of validation batches: {len(val_gen)}')
-
+train_loss_list = []
+val_loss_list = []
 for epoch in range(num_epochs):
     print(f'Starting epoch {epoch+1}')
     model.train()
     train_loss = 0
+    total_train_samples = 0  # Keep track of total samples processed
 
-    # Ensure training loop processes only the expected number of batches
-    for batch_idx, (inputs, targets) in tqdm(enumerate(train_gen), total=len(train_gen)):
-        try:
-            inputs, targets = inputs.to(device), targets.to(device)  # Move to GPU
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, targets)
-            loss.backward()
-            optimizer.step()
-            train_loss += loss.item() * inputs.size(0)
-            print(f'Batch train loss: {loss.item():.4f}')  # Print batch training loss for debugging
+    for batch_idx, batch in enumerate(train_gen):
+        if batch_idx >= len(train_gen):
+            break 
+        inputs, targets = batch
+        inputs, targets = inputs.to(device), targets.to(device)
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = criterion(outputs, targets)
+        loss.backward()
+        optimizer.step()
+        batch_loss = loss.item()
+        train_loss += batch_loss * inputs.size(0)
+        total_train_samples += inputs.size(0)
+        #print(f'Batch {batch_idx + 1}/{len(train_gen)}, Train Loss: {batch_loss:.4f}')
 
-        except Exception as e:
-            print(f'Error processing batch {batch_idx+1}: {e}')
-            continue
-
-    train_loss /= len(train_gen.dataset)
-    print(f'Epoch {epoch+1} training completed. Train Loss: {train_loss:.4f}')
-
-    print(f'Validation loop starting for epoch {epoch+1}')
+    train_loss /= total_train_samples
+    print(f'Epoch {epoch+1} training completed. Average Train Loss: {train_loss:.4f}')
+    train_loss_list.append(train_loss)
     model.eval()
     val_loss = 0
-    batch_count = 0  # Add a counter to count the number of batches
+    total_val_samples = 0  # Keep track of total samples processed
+
     with torch.no_grad():
-        for batch_idx, (inputs, targets) in tqdm(enumerate(val_gen), total=len(val_gen)):
-            try:
-                batch_count += 1
-                print(f'Processing validation batch {batch_idx+1}/{len(val_gen)}')
-                inputs, targets = inputs.to(device), targets.to(device)  # Move to GPU
-                outputs = model(inputs)
-                loss = criterion(outputs, targets)
-                val_loss += loss.item() * inputs.size(0)
-                print(f'Batch val loss: {loss.item():.4f}')  # Print batch validation loss for debugging
+        for batch_idx, batch in enumerate(val_gen):
+            if batch_idx >= len(val_gen):
+                break
+            inputs, targets = batch
+            inputs, targets = inputs.to(device), targets.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, targets)
+            batch_loss = loss.item()
+            val_loss += batch_loss * inputs.size(0)
+            total_val_samples += inputs.size(0)
+            #print(f'Batch {batch_idx + 1}/{len(val_gen)}, Val Loss: {batch_loss:.4f}')
 
-            except Exception as e:
-                print(f'Error processing validation batch {batch_idx+1}: {e}')
-                continue
-
-    if batch_count == 0:
-        print("No validation batches processed.")
-
-    val_loss /= len(val_gen.dataset)
-    print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}')
+    val_loss /= total_val_samples
+    print(f'Epoch {epoch+1}, Average Val Loss: {val_loss:.4f}')
+    val_loss_list.append(val_loss)
 
     # Save the model if the validation loss is the lowest we've seen so far.
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         torch.save(model.state_dict(), best_model_path)
         print(f'Model saved with validation loss of {val_loss:.4f}')
+    scheduler.step()
+    current_lr = scheduler.get_last_lr()[0]  # Get the last learning rate
+    print(f'Epoch {epoch+1}/{num_epochs}, Current learning rate: {current_lr}')
+
+with open("train_loss", "wb") as fp:   #Pickling
+    pickle.dump(train_loss_list, fp)
+with open("val_loss", "wb") as fp:   #Pickling
+    pickle.dump(val_loss_list, fp)
