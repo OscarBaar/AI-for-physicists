@@ -7,6 +7,18 @@ from src.blocks import Autoencoder, ConvDecoder, ConvEncoder
 
 
 def load_model(weights_path, encoder, decoder, device='cpu'):
+    """
+    Function to load a pre-trained model.
+
+    Parameters:
+        weights_path (string): Path to the model weights.
+        encoder (torch.nn.Module): The encoder model.
+        decoder (torch.nn.Module): The decoder model.
+        device (string): The device to load the model on.
+
+    Returns:
+        model (torch.nn.Module): The loaded model.
+    """
     model = Autoencoder(encoder, decoder)
     map_location = torch.device(device) if torch.cuda.is_available() and 'cuda' in device else torch.device('cpu')
     model.load_state_dict(torch.load(weights_path, map_location=map_location))
@@ -16,6 +28,16 @@ def load_model(weights_path, encoder, decoder, device='cpu'):
 
 
 def preprocess_image(image_array):
+    """
+    Function to preprocess an image array.
+
+    Parameters:
+        image_array (numpy.ndarray): The image array to preprocess.
+
+    Returns:
+        image_tensor (torch.Tensor): The preprocessed image tensor.
+    """
+
     if image_array.dtype != np.float32:
         image_array = image_array.astype(np.float32)
     transform = transforms.Compose([
@@ -27,6 +49,18 @@ def preprocess_image(image_array):
 
 
 def get_prediction(model, image_tensor, device):
+    """
+    Function to get a prediction from a model.
+
+    Parameters:
+        model (torch.nn.Module): The model to use for prediction.
+        image_tensor (torch.Tensor): The input image tensor.
+        device (string): The device to use for prediction.
+
+    Returns:
+        output (numpy.ndarray): The model's prediction.
+    """
+
     model.to(device)
     image_tensor = image_tensor.to(device)
     with torch.no_grad():
@@ -35,13 +69,29 @@ def get_prediction(model, image_tensor, device):
 
 
 def calculate_mse(img1, img2):
-    """Helper function to calculate MSE between two images"""
+    """Helper function to calculate MSE between two images
+    
+    Parameters:
+        img1 (numpy.ndarray): The first image (usually the original image).
+        img2 (numpy.ndarray): The second image (usually the output image).
+    """
+
 
     return np.mean((img1 - img2) ** 2)
 
 
 def calculate_similarity(mse, max_mse):
-    """Helper function to calculate similarity between two images"""
+    """Helper function to calculate similarity between two images
+    
+    Parameters:
+        mse (float): The mean squared error between two images.
+        max_mse (float): The maximum possible value of the MSE.
+
+    Returns:
+        similarity (float): The similarity between the two images as a percentage.
+    """
+
+
     similarity = (1 - mse / max_mse) * 100
     return similarity
 
