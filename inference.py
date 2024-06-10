@@ -154,7 +154,7 @@ def main():
     data_df = data_df[data_df["Max_Value"] > 300]
     diff_list, similarity_list, mse_list, similarity_mse_list, psnr_list, ssim_list = [], [], [], [], [], []
 
-    for file_name in data_df["File_Name"][:10]:
+    for file_name in data_df["File_Name"]:
         image = np.load(os.path.join(folder, file_name))
         image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
         image_tensor = preprocess_image(image)
@@ -183,7 +183,7 @@ def main():
     print(f"Mean PSNR: {np.mean(psnr_list)}")
     print(f"Mean SSIM: {np.mean(ssim_list)}")
 
-    model_results = pd.DataFrame({"File_Name": data_df["File_Name"][:10],
+    model_results = pd.DataFrame({"File_Name": data_df["File_Name"],
                                   "Difference": diff_list,
                                   "Similarity": similarity_list,
                                   "MSE": mse_list,
