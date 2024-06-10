@@ -20,7 +20,6 @@ def autoencoder(input_shape=(1,400,400),kernel_size=5):
     return model
 
 
-
 num_channels = 128  # Number of channels in the encoder and decoder
 input_image_dimensions = (1, 400, 400)  # Format (Channels, Height, Width)
 
