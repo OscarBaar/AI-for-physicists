@@ -145,6 +145,7 @@ def main():
     mse_list, similarity_list = [], []
     for file_name in file_names:
         image_array = np.load(os.path.join(folder, file_name))  # Load your image array here
+        image_array = (image_array - np.min(image_array)) / (np.max(image_array) - np.min(image_array))
         image_tensor = preprocess_image(image_array)
         device = "cuda" if torch.cuda.is_available() else "cpu"
         prediction = get_prediction(model, image_tensor, device)
