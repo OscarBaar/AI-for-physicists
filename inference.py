@@ -6,6 +6,7 @@ from torchvision import transforms
 from src.blocks import Autoencoder, ConvDecoder, ConvEncoder
 from scipy.ndimage import gaussian_filter
 import time
+import random
 
 
 def load_model(weights_path, encoder, decoder, device='cpu'):
@@ -14,7 +15,7 @@ def load_model(weights_path, encoder, decoder, device='cpu'):
 
     Parameters:
         weights_path (string): Path to the model weights.
-        encoder (torch.nn.Module): The encoder model.
+        encoder (torch.nn.Module): The encoder model. 
         decoder (torch.nn.Module): The decoder model.
         device (string): The device to load the model on.
 
@@ -60,14 +61,23 @@ def get_prediction(model, image_tensor, device):
 
     Returns:
         output (numpy.ndarray): The model's prediction.
+        encode_time (float): Time taken to encode the image.
+        decode_time (float): Time taken to decode the image.
     """
-    model.to(device)
+    encoder, decoder = model.encoder, model.decoder 
     image_tensor = image_tensor.to(device)
-    start_time = time.time()  # Start timing
+ 
+    start_encode = time.time()
     with torch.no_grad():
-        output = model(image_tensor)
-    elapsed_time = time.time() - start_time  # Calculate inference time
-    return output.cpu().numpy(), elapsed_time
+        encoded = encoder(image_tensor)
+    encode_time = time.time() - start_encode
+
+    start_decode = time.time()
+    with torch.no_grad():
+        output = decoder(encoded)
+    decode_time = time.time() - start_decode
+
+    return output.detach().cpu().numpy(), encode_time, decode_time
 
 
 def calculate_mse(img1, img2):
@@ -153,21 +163,42 @@ def main():
     decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
     model = load_model(weights, encoder, decoder)
 
+    # Load data
     data_df = pd.read_csv(os.path.join(folder, "file_info.csv"))
     data_df = data_df[data_df["Max_Value"] > 300]
     
+    # Split data to ensure using only test data
+    scale = {'x_min': data_df["Min_Value"].min(), "x_max": data_df["Max_Value"].max()}
+    train_split = 0.7
+    val_split = 0.15
+    test_split = 0.15
+
+    listIDs = data_df['File_Name'].tolist()
+    random.seed(333)
+    random.shuffle(listIDs)
+
+    num_train = int(round(train_split * len(listIDs)))
+    num_val = int(round(val_split * len(listIDs)))
+
+    testIDs = listIDs[num_train + num_val:]
+
+    test_df = data_df[data_df['File_Name'].isin(testIDs)]
+
+    print(len(test_df))
+
     # Initialize lists to collect metrics and inference times
     diff_list, similarity_list, mse_list, similarity_mse_list, psnr_list, ssim_list, inference_times = [], [], [], [], [], [], []
 
-    for file_name in data_df["File_Name"]:
+    for file_name in test_df["File_Name"]:
         image = np.load(os.path.join(folder, file_name))
         image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
         image_tensor = preprocess_image(image)
         device = "cuda" if torch.cuda.is_available() else "cpu"
         
         # Get prediction
-        prediction, elapsed_time = get_prediction(model, image_tensor, device)
-        inference_times.append(elapsed_time)
+        prediction, encode_time, decode_time = get_prediction(model, image_tensor, device)
+        total_inference_time = encode_time + decode_time
+        inference_times.append(total_inference_time)
 
         mse = calculate_mse(image, prediction)
         diff = image - prediction
@@ -184,27 +215,27 @@ def main():
         ssim_list.append(ssim)
 
     print("Evaluation Results:")
-    print(f"Mean difference: {np.mean(diff_list)} ")
-    print(f"Mean similarity: {np.mean(similarity_list)} ")
-    print(f"Mean MSE: {np.mean(mse_list)} ")
-    print(f"Mean MSE similarity: {np.mean(similarity_mse_list)} ")
-    print(f"Mean PSNR: {np.mean(psnr_list)} ")
-    print(f"Mean SSIM: {np.mean(ssim_list)} ")
-    print(f"Mean inference time: {np.mean(inference_times)} seconds ")
+    print(f"Mean difference: {np.mean(diff_list)}")
+    print(f"Mean similarity: {np.mean(similarity_list)}")
+    print(f"Mean MSE: {np.mean(mse_list)}")
+    print(f"Mean MSE similarity: {np.mean(similarity_mse_list)}")
+    print(f"Mean PSNR: {np.mean(psnr_list)}")
+    print(f"Mean SSIM: {np.mean(ssim_list)}")
+    print(f"Mean inference time: {np.mean(inference_times)} seconds")
 
     # Create DataFrame to store results along with inference times
     model_results = pd.DataFrame({
-        "File_Name": data_df["File_Name"],
+        "File_Name": test_df["File_Name"],
         "Difference": diff_list,
         "Similarity": similarity_list,
         "MSE": mse_list,
         "Similarity_MSE": similarity_mse_list,
         "PSNR": psnr_list,
         "SSIM": ssim_list,
-        "Inference_Time": inference_times  # Adding inference times to the DataFrame
+        "Inference_Time": inference_times
     })
 
     model_results.to_csv('model_results.csv', index=False)
 
 if __name__ == "__main__":
-    main()
+    main() 

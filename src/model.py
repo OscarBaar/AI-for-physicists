@@ -1,8 +1,7 @@
 import numpy as np
 import torch
-from src.blocks import ConvEncoder, ConvDecoder
-
-
+from blocks import Autoencoder, ConvEncoder, ConvDecoder
+from torchsummary import summary
 
 def autoencoder(input_shape=(1,400,400),kernel_size=5):
     
@@ -20,3 +19,18 @@ def autoencoder(input_shape=(1,400,400),kernel_size=5):
     model = torch.nn.Model(inputs, outputs)
     return model
 
+
+
+num_channels = 128  # Number of channels in the encoder and decoder
+input_image_dimensions = (1, 400, 400)  # Format (Channels, Height, Width)
+
+
+encoder = ConvEncoder(num_channels=num_channels, kernel_size=5, strides=1, pooling=2)
+decoder = ConvDecoder(num_channels=num_channels, kernel_size=5, strides=2)
+
+model = Autoencoder(encoder=encoder, decoder=decoder)
+
+# Use torchsummary to print the model summary
+model.to('cuda' if torch.cuda.is_available() else 'cpu')
+
+summary(model, input_size=input_image_dimensions)
