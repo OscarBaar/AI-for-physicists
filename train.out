@@ -1,0 +1,240 @@
+Number of training batches: 269
+Number of validation batches: 57
+Starting epoch 1
+Epoch 1 training completed. Average Train Loss: 0.1291
+Epoch 1, Average Val Loss: 0.0035
+Model saved with validation loss of 0.0035
+Epoch 1/50, Current learning rate: 0.005
+Starting epoch 2
+Epoch 2 training completed. Average Train Loss: 0.0024
+Epoch 2, Average Val Loss: 0.0020
+Model saved with validation loss of 0.0020
+Epoch 2/50, Current learning rate: 0.005
+Starting epoch 3
+Epoch 3 training completed. Average Train Loss: 0.0017
+Epoch 3, Average Val Loss: 0.0015
+Model saved with validation loss of 0.0015
+Epoch 3/50, Current learning rate: 0.005
+Starting epoch 4
+Epoch 4 training completed. Average Train Loss: 0.0015
+Epoch 4, Average Val Loss: 0.0019
+Epoch 4/50, Current learning rate: 0.005
+Starting epoch 5
+Epoch 5 training completed. Average Train Loss: 0.0016
+Epoch 5, Average Val Loss: 0.0011
+Model saved with validation loss of 0.0011
+Epoch 5/50, Current learning rate: 0.0025
+Starting epoch 6
+Epoch 6 training completed. Average Train Loss: 0.0011
+Epoch 6, Average Val Loss: 0.0011
+Model saved with validation loss of 0.0011
+Epoch 6/50, Current learning rate: 0.0025
+Starting epoch 7
+Epoch 7 training completed. Average Train Loss: 0.0010
+Epoch 7, Average Val Loss: 0.0010
+Model saved with validation loss of 0.0010
+Epoch 7/50, Current learning rate: 0.0025
+Starting epoch 8
+Epoch 8 training completed. Average Train Loss: 0.0010
+Epoch 8, Average Val Loss: 0.0009
+Model saved with validation loss of 0.0009
+Epoch 8/50, Current learning rate: 0.0025
+Starting epoch 9
+Epoch 9 training completed. Average Train Loss: 0.0009
+Epoch 9, Average Val Loss: 0.0009
+Model saved with validation loss of 0.0009
+Epoch 9/50, Current learning rate: 0.0025
+Starting epoch 10
+Epoch 10 training completed. Average Train Loss: 0.0010
+Epoch 10, Average Val Loss: 0.0008
+Model saved with validation loss of 0.0008
+Epoch 10/50, Current learning rate: 0.00125
+Starting epoch 11
+Epoch 11 training completed. Average Train Loss: 0.0008
+Epoch 11, Average Val Loss: 0.0008
+Model saved with validation loss of 0.0008
+Epoch 11/50, Current learning rate: 0.00125
+Starting epoch 12
+Epoch 12 training completed. Average Train Loss: 0.0007
+Epoch 12, Average Val Loss: 0.0008
+Model saved with validation loss of 0.0008
+Epoch 12/50, Current learning rate: 0.00125
+Starting epoch 13
+Epoch 13 training completed. Average Train Loss: 0.0008
+Epoch 13, Average Val Loss: 0.0008
+Epoch 13/50, Current learning rate: 0.00125
+Starting epoch 14
+Epoch 14 training completed. Average Train Loss: 0.0007
+Epoch 14, Average Val Loss: 0.0007
+Model saved with validation loss of 0.0007
+Epoch 14/50, Current learning rate: 0.00125
+Starting epoch 15
+Epoch 15 training completed. Average Train Loss: 0.0007
+Epoch 15, Average Val Loss: 0.0007
+Epoch 15/50, Current learning rate: 0.000625
+Starting epoch 16
+Epoch 16 training completed. Average Train Loss: 0.0006
+Epoch 16, Average Val Loss: 0.0007
+Model saved with validation loss of 0.0007
+Epoch 16/50, Current learning rate: 0.000625
+Starting epoch 17
+Epoch 17 training completed. Average Train Loss: 0.0006
+Epoch 17, Average Val Loss: 0.0007
+Model saved with validation loss of 0.0007
+Epoch 17/50, Current learning rate: 0.000625
+Starting epoch 18
+Epoch 18 training completed. Average Train Loss: 0.0006
+Epoch 18, Average Val Loss: 0.0007
+Model saved with validation loss of 0.0007
+Epoch 18/50, Current learning rate: 0.000625
+Starting epoch 19
+Epoch 19 training completed. Average Train Loss: 0.0006
+Epoch 19, Average Val Loss: 0.0007
+Epoch 19/50, Current learning rate: 0.000625
+Starting epoch 20
+Epoch 20 training completed. Average Train Loss: 0.0006
+Epoch 20, Average Val Loss: 0.0006
+Model saved with validation loss of 0.0006
+Epoch 20/50, Current learning rate: 0.0003125
+Starting epoch 21
+Epoch 21 training completed. Average Train Loss: 0.0006
+Epoch 21, Average Val Loss: 0.0006
+Model saved with validation loss of 0.0006
+Epoch 21/50, Current learning rate: 0.0003125
+Starting epoch 22
+Epoch 22 training completed. Average Train Loss: 0.0006
+Epoch 22, Average Val Loss: 0.0006
+Model saved with validation loss of 0.0006
+Epoch 22/50, Current learning rate: 0.0003125
+Starting epoch 23
+Epoch 23 training completed. Average Train Loss: 0.0006
+Epoch 23, Average Val Loss: 0.0006
+Epoch 23/50, Current learning rate: 0.0003125
+Starting epoch 24
+Epoch 24 training completed. Average Train Loss: 0.0006
+Epoch 24, Average Val Loss: 0.0006
+Model saved with validation loss of 0.0006
+Epoch 24/50, Current learning rate: 0.0003125
+Starting epoch 25
+Epoch 25 training completed. Average Train Loss: 0.0006
+Epoch 25, Average Val Loss: 0.0006
+Epoch 25/50, Current learning rate: 0.00015625
+Starting epoch 26
+Epoch 26 training completed. Average Train Loss: 0.0005
+Epoch 26, Average Val Loss: 0.0006
+Model saved with validation loss of 0.0006
+Epoch 26/50, Current learning rate: 0.00015625
+Starting epoch 27
+Epoch 27 training completed. Average Train Loss: 0.0005
+Epoch 27, Average Val Loss: 0.0006
+Model saved with validation loss of 0.0006
+Epoch 27/50, Current learning rate: 0.00015625
+Starting epoch 28
+Epoch 28 training completed. Average Train Loss: 0.0005
+Epoch 28, Average Val Loss: 0.0006
+Model saved with validation loss of 0.0006
+Epoch 28/50, Current learning rate: 0.00015625
+Starting epoch 29
+Epoch 29 training completed. Average Train Loss: 0.0005
+Epoch 29, Average Val Loss: 0.0006
+Model saved with validation loss of 0.0006
+Epoch 29/50, Current learning rate: 0.00015625
+Starting epoch 30
+Epoch 30 training completed. Average Train Loss: 0.0005
+Epoch 30, Average Val Loss: 0.0006
+Epoch 30/50, Current learning rate: 7.8125e-05
+Starting epoch 31
+Epoch 31 training completed. Average Train Loss: 0.0005
+Epoch 31, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 31/50, Current learning rate: 7.8125e-05
+Starting epoch 32
+Epoch 32 training completed. Average Train Loss: 0.0005
+Epoch 32, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 32/50, Current learning rate: 7.8125e-05
+Starting epoch 33
+Epoch 33 training completed. Average Train Loss: 0.0005
+Epoch 33, Average Val Loss: 0.0005
+Epoch 33/50, Current learning rate: 7.8125e-05
+Starting epoch 34
+Epoch 34 training completed. Average Train Loss: 0.0005
+Epoch 34, Average Val Loss: 0.0005
+Epoch 34/50, Current learning rate: 7.8125e-05
+Starting epoch 35
+Epoch 35 training completed. Average Train Loss: 0.0005
+Epoch 35, Average Val Loss: 0.0005
+Epoch 35/50, Current learning rate: 3.90625e-05
+Starting epoch 36
+Epoch 36 training completed. Average Train Loss: 0.0005
+Epoch 36, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 36/50, Current learning rate: 3.90625e-05
+Starting epoch 37
+Epoch 37 training completed. Average Train Loss: 0.0005
+Epoch 37, Average Val Loss: 0.0005
+Epoch 37/50, Current learning rate: 3.90625e-05
+Starting epoch 38
+Epoch 38 training completed. Average Train Loss: 0.0005
+Epoch 38, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 38/50, Current learning rate: 3.90625e-05
+Starting epoch 39
+Epoch 39 training completed. Average Train Loss: 0.0005
+Epoch 39, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 39/50, Current learning rate: 3.90625e-05
+Starting epoch 40
+Epoch 40 training completed. Average Train Loss: 0.0005
+Epoch 40, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 40/50, Current learning rate: 1.953125e-05
+Starting epoch 41
+Epoch 41 training completed. Average Train Loss: 0.0005
+Epoch 41, Average Val Loss: 0.0005
+Epoch 41/50, Current learning rate: 1.953125e-05
+Starting epoch 42
+Epoch 42 training completed. Average Train Loss: 0.0005
+Epoch 42, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 42/50, Current learning rate: 1.953125e-05
+Starting epoch 43
+Epoch 43 training completed. Average Train Loss: 0.0005
+Epoch 43, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 43/50, Current learning rate: 1.953125e-05
+Starting epoch 44
+Epoch 44 training completed. Average Train Loss: 0.0005
+Epoch 44, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 44/50, Current learning rate: 1.953125e-05
+Starting epoch 45
+Epoch 45 training completed. Average Train Loss: 0.0005
+Epoch 45, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 45/50, Current learning rate: 9.765625e-06
+Starting epoch 46
+Epoch 46 training completed. Average Train Loss: 0.0005
+Epoch 46, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 46/50, Current learning rate: 9.765625e-06
+Starting epoch 47
+Epoch 47 training completed. Average Train Loss: 0.0005
+Epoch 47, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 47/50, Current learning rate: 9.765625e-06
+Starting epoch 48
+Epoch 48 training completed. Average Train Loss: 0.0005
+Epoch 48, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 48/50, Current learning rate: 9.765625e-06
+Starting epoch 49
+Epoch 49 training completed. Average Train Loss: 0.0005
+Epoch 49, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 49/50, Current learning rate: 9.765625e-06
+Starting epoch 50
+Epoch 50 training completed. Average Train Loss: 0.0005
+Epoch 50, Average Val Loss: 0.0005
+Model saved with validation loss of 0.0005
+Epoch 50/50, Current learning rate: 4.8828125e-06
