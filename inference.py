@@ -222,7 +222,7 @@ def infer_all(model, data_folder, df):
     model_results.to_csv('model_results.csv', index=False)
 
 
-def plot_images(original_images, predictions, titles, param, file_info):
+def plot_images(original_images, predictions, titles, file_info):
     """
     Plots best and worst results of the model according to different parameters.
 
@@ -230,7 +230,6 @@ def plot_images(original_images, predictions, titles, param, file_info):
         original_images (list of np.ndarray): List of original images.
         predictions (list of np.ndarray): List of predicted images by the model.
         titles (list of str): List of titles for the plots.
-        param (str): The parameter name used for selecting best and worst results.
         file_info (list of dict): List of dictionaries containing detailed information about each image.
 
     Returns:
@@ -239,16 +238,19 @@ def plot_images(original_images, predictions, titles, param, file_info):
     fig, axes = plt.subplots(2, 2, figsize=(12, 12))
     for i in range(len(original_images)):
         axes[i, 0].imshow(original_images[i], cmap='gray')
-        axes[i, 0].set_title(f'Original - {titles[i]} ({param})')
+        axes[i, 0].set_title(f'Original - {titles[i]}')
         axes[i, 1].imshow(predictions[i], cmap='gray')
-        axes[i, 1].set_title(f'Prediction - {titles[i]} ({param})')
+        axes[i, 1].set_title(f'Prediction - {titles[i]}')
 
+        # Print variables and values aligned
         info = file_info[i]
-        for key, value in info.items():
-            print(f'{key}: \t \t \t {value}')
+        max_length = max(len(name) for name in info.keys())
+        for name, value in info.items():
+            print(f"{name:<{max_length}}: {value}")
         print('\n')
 
     plt.tight_layout()
+    plt.savefig(os.path.join('results', f'{titles[i]}.jpg'))
     plt.show()
 
 
@@ -297,15 +299,14 @@ def plot_results(model, data_folder, file_df, results_df):
         images_low, predictions_low, titles_low, file_info_low = [], [], [], []
         for idx, row in lowest_val.iterrows():
             file_name = row["File_Name"]
-            print(file_name)
             image = np.load(os.path.join(data_folder, file_name))
             image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
             image_tensor = preprocess_image(image)
             prediction, _, _ = get_prediction(model, image_tensor, device)
 
-            images_low.append(image[0, 0])
+            images_low.append(image)
             predictions_low.append(prediction[0, 0, :, :])
-            titles_low.append(f'{file_name} (High {column})')
+            titles_low.append(f'{file_name} (Low {column})')
 
             file_info = {col: row[col] for col in results_df.columns}
             file_info.update(file_df[file_df['File_Name'] == file_name].to_dict('records')[0])
@@ -313,8 +314,8 @@ def plot_results(model, data_folder, file_df, results_df):
 
         # Plot images and print parameters
         print(f'Plotting for parameter: {column}')
-        plot_images(images_high, predictions_high, titles_high, f'High {column}', file_info_high)
-        plot_images(images_low, predictions_low, titles_low, f'Low {column}', file_info_low)
+        plot_images(images_high, predictions_high, titles_high, file_info_high)
+        plot_images(images_low, predictions_low, titles_low, file_info_low)
 
 
 def main():
