@@ -7,6 +7,7 @@ from src.blocks import Autoencoder, ConvDecoder, ConvEncoder
 from scipy.ndimage import gaussian_filter
 import time
 import random
+import matplotlib.pyplot as plt
 
 
 def load_model(weights_path, encoder, decoder, device='cpu'):
@@ -156,6 +157,166 @@ def calculate_ssim(img1, img2, max_pixel_value=1.0, k1=0.01, k2=0.03):
     return ssim_map.mean()
 
 
+def infer_all(model, data_folder, df):
+    """
+    Apply the model to all images from df,
+
+    Parameters:
+        model (torch.model): The autoencoder model to be used for inference.
+        data_folder (string): Folder containing the original images.
+        df (pd.DataFrame): Information about the original images.
+
+    Returns:
+        None
+    """
+    (err_list, similarity_list, mse_list, similarity_mse_list,
+     psnr_list, ssim_list, inference_times) = [], [], [], [], [], [], []
+
+    for file_name in df["File_Name"]:
+        print(file_name)
+        image = np.load(os.path.join(data_folder, file_name))
+        image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
+        image_tensor = preprocess_image(image)
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        # Get prediction
+        prediction, encode_time, decode_time = get_prediction(model, image_tensor, device)
+        total_inference_time = encode_time + decode_time
+        inference_times.append(total_inference_time)
+
+        mse = calculate_mse(image, prediction)
+        err = np.mean(np.abs(image - prediction))
+        similarity = calculate_similarity(err)
+        similarity_mse = calculate_similarity(mse)
+        psnr = calculate_psnr(image, prediction)
+        ssim = calculate_ssim(image, prediction)
+
+        err_list.append(err)
+        similarity_list.append(similarity)
+        mse_list.append(mse)
+        similarity_mse_list.append(similarity_mse)
+        psnr_list.append(psnr)
+        ssim_list.append(ssim)
+
+    print("Evaluation Results:")
+    print(f"Mean error: {np.mean(err_list)}")
+    print(f"Mean similarity: {np.mean(similarity_list)}")
+    print(f"Mean MSE: {np.mean(mse_list)}")
+    print(f"Mean MSE similarity: {np.mean(similarity_mse_list)}")
+    print(f"Mean PSNR: {np.mean(psnr_list)}")
+    print(f"Mean SSIM: {np.mean(ssim_list)}")
+    print(f"Mean inference time: {np.mean(inference_times)} seconds")
+
+    # Create DataFrame to store results along with inference times
+    model_results = pd.DataFrame({
+        "File_Name": df["File_Name"],
+        "Error": err_list,
+        "Similarity": similarity_list,
+        "MSE": mse_list,
+        "Similarity_MSE": similarity_mse_list,
+        "PSNR": psnr_list,
+        "SSIM": ssim_list,
+        "Inference_Time": inference_times
+    })
+
+    model_results.to_csv('model_results.csv', index=False)
+
+
+def plot_images(original_images, predictions, titles, param, file_info):
+    """
+    Plots best and worst results of the model according to different parameters.
+
+    Parameters:
+        original_images (list of np.ndarray): List of original images.
+        predictions (list of np.ndarray): List of predicted images by the model.
+        titles (list of str): List of titles for the plots.
+        param (str): The parameter name used for selecting best and worst results.
+        file_info (list of dict): List of dictionaries containing detailed information about each image.
+
+    Returns:
+        None
+    """
+    fig, axes = plt.subplots(2, 2, figsize=(12, 12))
+    for i in range(len(original_images)):
+        axes[i, 0].imshow(original_images[i], cmap='gray')
+        axes[i, 0].set_title(f'Original - {titles[i]} ({param})')
+        axes[i, 1].imshow(predictions[i], cmap='gray')
+        axes[i, 1].set_title(f'Prediction - {titles[i]} ({param})')
+
+        info = file_info[i]
+        for key, value in info.items():
+            print(f'{key}: \t \t \t {value}')
+        print('\n')
+
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_results(model, data_folder, file_df, results_df):
+    """
+    Plots best and worst results of the model according to different parameters.
+
+    Parameters:
+        model (torch.model): The autoencoder model to be used for inference.
+        data_folder (string): Folder containing the original images.
+        file_df (pd.DataFrame): Information about the original images.
+        results_df (pd.DataFrame): Information about the inference results.
+
+    Returns:
+        None
+    """
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    columns = results_df.columns
+    num_images = 2
+
+    for column in columns:
+        if column == 'File_Name':
+            continue
+
+        highest_val = results_df.nlargest(num_images, column)
+        lowest_val = results_df.nsmallest(num_images, column)
+
+        # Get results of highest values
+        images_high, predictions_high, titles_high, file_info_high = [], [], [], []
+        for idx, row in highest_val.iterrows():
+            file_name = row["File_Name"]
+            image = np.load(os.path.join(data_folder, file_name))
+            image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
+            image_tensor = preprocess_image(image)
+            prediction, _, _ = get_prediction(model, image_tensor, device)
+
+            images_high.append(image)
+            predictions_high.append(prediction[0, 0, :, :])
+            titles_high.append(f'{file_name} (High {column})')
+
+            file_info = {col: row[col] for col in results_df.columns}
+            file_info.update(file_df[file_df['File_Name'] == file_name].to_dict('records')[0])
+            file_info_high.append(file_info)
+
+        # Get results of lowest values
+        images_low, predictions_low, titles_low, file_info_low = [], [], [], []
+        for idx, row in lowest_val.iterrows():
+            file_name = row["File_Name"]
+            print(file_name)
+            image = np.load(os.path.join(data_folder, file_name))
+            image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
+            image_tensor = preprocess_image(image)
+            prediction, _, _ = get_prediction(model, image_tensor, device)
+
+            images_low.append(image[0, 0])
+            predictions_low.append(prediction[0, 0, :, :])
+            titles_low.append(f'{file_name} (High {column})')
+
+            file_info = {col: row[col] for col in results_df.columns}
+            file_info.update(file_df[file_df['File_Name'] == file_name].to_dict('records')[0])
+            file_info_low.append(file_info)
+
+        # Plot images and print parameters
+        print(f'Plotting for parameter: {column}')
+        plot_images(images_high, predictions_high, titles_high, f'High {column}', file_info_high)
+        plot_images(images_low, predictions_low, titles_low, f'Low {column}', file_info_low)
+
+
 def main():
     folder = "data_2d"
     weights = "best_model.pth"
@@ -168,74 +329,25 @@ def main():
     data_df = data_df[data_df["Max_Value"] > 300]
     
     # Split data to ensure using only test data
-    scale = {'x_min': data_df["Min_Value"].min(), "x_max": data_df["Max_Value"].max()}
-    train_split = 0.7
-    val_split = 0.15
-    test_split = 0.15
-
-    listIDs = data_df['File_Name'].tolist()
+    train_split, val_split, test_split = 0.7, 0.15, 0.15
+    list_ids = data_df['File_Name'].tolist()
     random.seed(333)
-    random.shuffle(listIDs)
+    random.shuffle(list_ids)
 
-    num_train = int(round(train_split * len(listIDs)))
-    num_val = int(round(val_split * len(listIDs)))
+    num_train = int(round(train_split * len(list_ids)))
+    num_val = int(round(val_split * len(list_ids)))
 
-    testIDs = listIDs[num_train + num_val:]
-
-    test_df = data_df[data_df['File_Name'].isin(testIDs)]
-
+    test_ids = list_ids[num_train + num_val:]
+    test_df = data_df[data_df['File_Name'].isin(test_ids)]
     print(len(test_df))
 
-    # Initialize lists to collect metrics and inference times
-    diff_list, similarity_list, mse_list, similarity_mse_list, psnr_list, ssim_list, inference_times = [], [], [], [], [], [], []
+    # Apply inference to all images
+    # infer_all(model, folder, test_df)
 
-    for file_name in test_df["File_Name"]:
-        image = np.load(os.path.join(folder, file_name))
-        image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
-        image_tensor = preprocess_image(image)
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        
-        # Get prediction
-        prediction, encode_time, decode_time = get_prediction(model, image_tensor, device)
-        total_inference_time = encode_time + decode_time
-        inference_times.append(total_inference_time)
+    # Plot best and worst performing images
+    model_results = pd.read_csv('model_results.csv')
+    plot_results(model, folder, test_df, model_results)
 
-        mse = calculate_mse(image, prediction)
-        diff = image - prediction
-        similarity = calculate_similarity(diff)
-        similarity_mse = calculate_similarity(mse)
-        psnr = calculate_psnr(image, prediction)
-        ssim = calculate_ssim(image, prediction)
-
-        diff_list.append(diff)
-        similarity_list.append(similarity)
-        mse_list.append(mse)
-        similarity_mse_list.append(similarity_mse)
-        psnr_list.append(psnr)
-        ssim_list.append(ssim)
-
-    print("Evaluation Results:")
-    print(f"Mean difference: {np.mean(diff_list)}")
-    print(f"Mean similarity: {np.mean(similarity_list)}")
-    print(f"Mean MSE: {np.mean(mse_list)}")
-    print(f"Mean MSE similarity: {np.mean(similarity_mse_list)}")
-    print(f"Mean PSNR: {np.mean(psnr_list)}")
-    print(f"Mean SSIM: {np.mean(ssim_list)}")
-    print(f"Mean inference time: {np.mean(inference_times)} seconds")
-
-    # Create DataFrame to store results along with inference times
-    model_results = pd.DataFrame({
-        "File_Name": test_df["File_Name"],
-        "Difference": diff_list,
-        "Similarity": similarity_list,
-        "MSE": mse_list,
-        "Similarity_MSE": similarity_mse_list,
-        "PSNR": psnr_list,
-        "SSIM": ssim_list,
-        "Inference_Time": inference_times
-    })
-
-    model_results.to_csv('model_results.csv', index=False)
 
 if __name__ == "__main__":
-    main() 
+    main()
