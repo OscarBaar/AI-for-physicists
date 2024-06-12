@@ -348,7 +348,8 @@ def main():
 
     # Plot best and worst performing images
     model_results = pd.read_csv('model_results.csv')
-    plot_results(model, folder, test_df, model_results)
+    model_results = (model_results.merge(data_df, on='File_Name', how='left'))
+    # plot_results(model, folder, test_df, model_results)
 
     # Create scatterplots
     plt.figure()
@@ -374,6 +375,23 @@ def main():
     plt.ylabel("SSIM")
     plt.savefig(os.path.join('results', 'MSEvsSSIM.png'))
     plt.show()
+
+    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+    ax[0].scatter(model_results['Mean_Value'], model_results['SSIM'], label="SSIM")
+    ax[0].set_xlabel("Mean Intensity (HU)")
+    ax[0].set_ylabel("SSIM")
+
+    ax[1].scatter(model_results['Mean_Value'], model_results['PSNR'], label="PSNR")
+    ax[1].set_xlabel("Mean Intensity (HU)")
+    ax[1].set_ylabel("PSNR")
+
+    ax[2].scatter(model_results['Mean_Value'], model_results['MSE'], label="MSE")
+    ax[2].set_xlabel("Mean Intensity (HU)")
+    ax[2].set_ylabel("MSE")
+
+    fig.tight_layout()
+    fig.savefig("Intensity.png")
+    fig.show()
 
 
 if __name__ == "__main__":
