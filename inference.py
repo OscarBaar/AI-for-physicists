@@ -303,6 +303,7 @@ def plot_results(model, data_folder, file_df, results_df):
             image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
             image_tensor = preprocess_image(image)
             prediction, _, _ = get_prediction(model, image_tensor, device)
+            np.save(os.path.join('predictions', 'pred_'+file_name), prediction)
 
             images_low.append(image)
             predictions_low.append(prediction[0, 0, :, :])
@@ -348,6 +349,31 @@ def main():
     # Plot best and worst performing images
     model_results = pd.read_csv('model_results.csv')
     plot_results(model, folder, test_df, model_results)
+
+    # Create scatterplots
+    plt.figure()
+    plt.title("PSNR vs. SSIM")
+    plt.scatter(model_results['PSNR'], model_results['SSIM'])
+    plt.xlabel("PSNR")
+    plt.ylabel("SSIM")
+    plt.savefig(os.path.join('results', 'PSNRvsSSIM.png'))
+    plt.show()
+
+    plt.figure()
+    plt.title("MSE vs. PSNR")
+    plt.scatter(model_results['MSE'], model_results['PSNR'])
+    plt.xlabel("MSE")
+    plt.ylabel("PSNR")
+    plt.savefig(os.path.join('results', 'MSEvsPSNR.png'))
+    plt.show()
+
+    plt.figure()
+    plt.title("MSE vs. SSIM")
+    plt.scatter(model_results['MSE'], model_results['SSIM'])
+    plt.xlabel("MSE")
+    plt.ylabel("SSIM")
+    plt.savefig(os.path.join('results', 'MSEvsSSIM.png'))
+    plt.show()
 
 
 if __name__ == "__main__":
