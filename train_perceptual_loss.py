@@ -65,18 +65,23 @@ model = Autoencoder(encoder, decoder)
 optimizer = optim.Adam(model.parameters(), lr=5e-3)
 scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
 
-device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+print(device)
 model.to(device)
 vgg.to(device)
 
 best_val_loss = float('inf')
 best_model_path = 'best_model.pth'
-
-for epoch in range(50):
+train_loss_list = []
+val_loss_list = []
+for epoch in tqdm(range(50)):
     model.train()
     train_loss = 0
     total_train_samples = 0
-    for inputs, targets in train_gen:
+    for batch_idx,batch in enumerate(train_gen):
+        if batch_idx >= len(train_gen):
+            break 
+        inputs, targets = batch
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = model(inputs)
@@ -87,13 +92,17 @@ for epoch in range(50):
         total_train_samples += inputs.size(0)
 
     train_loss /= total_train_samples
-    print(f'Epoch {epoch+1}, Train Loss: {train_loss:.4f}')
+    print(f'Epoch {epoch+1}, Train Loss: {train_loss:.6f}')
+    train_loss_list.append(train_loss)
 
     model.eval()
     val_loss = 0
     total_val_samples = 0 #Keep track of total samples processed
     with torch.no_grad():
-        for inputs, targets in val_gen:
+         for batch_idx, batch in enumerate(val_gen):
+            if batch_idx >= len(val_gen):
+                break
+            inputs, targets = batch
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
             loss = perceptual_loss(outputs, targets)
@@ -102,7 +111,8 @@ for epoch in range(50):
 
      # Save the model if the validation loss is the lowest we've seen so far.
     val_loss /= total_val_samples
-    print(f'Epoch {epoch+1}, Val Loss: {val_loss:.4f}')
+    print(f'Epoch {epoch+1}, Val Loss: {val_loss:.6f}')
+    val_loss_list.append(val_loss)
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         torch.save(model.state_dict(), best_model_path)

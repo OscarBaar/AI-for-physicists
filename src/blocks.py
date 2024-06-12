@@ -67,7 +67,7 @@ class ConvEncoder(nn.Module):
         x = self.conv2(x)
         x = self.norm2(x)
         x = self.activation(x)
-        x = self.pool(x)
+        x= self.pool(x)
         # Third convolutional block
         x = self.conv3(x)
         x = self.norm3(x)
