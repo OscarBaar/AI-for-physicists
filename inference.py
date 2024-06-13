@@ -219,7 +219,7 @@ def infer_all(model, data_folder, df):
         "Inference_Time": inference_times
     })
 
-    model_results.to_csv('model_results.csv', index=False)
+    model_results.to_csv('model_results_2.csv', index=False)
 
 
 def plot_images(original_images, predictions, titles, file_info):
@@ -250,7 +250,9 @@ def plot_images(original_images, predictions, titles, file_info):
         print('\n')
 
     plt.tight_layout()
-    plt.savefig(os.path.join('results', f'{titles[i]}.jpg'))
+    os.makedirs('results_2', exist_ok=True)
+
+    plt.savefig(os.path.join('results_2', f'{titles[i]}.jpg'))
     plt.show()
 
 
@@ -303,6 +305,7 @@ def plot_results(model, data_folder, file_df, results_df):
             image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
             image_tensor = preprocess_image(image)
             prediction, _, _ = get_prediction(model, image_tensor, device)
+            os.makedirs('predictions', exist_ok=True)
             np.save(os.path.join('predictions', 'pred_'+file_name), prediction)
 
             images_low.append(image)
@@ -344,20 +347,20 @@ def main():
     print(len(test_df))
 
     # Apply inference to all images
-    # infer_all(model, folder, test_df)
+    infer_all(model, folder, test_df)
 
     # Plot best and worst performing images
-    model_results = pd.read_csv('model_results.csv')
+    model_results = pd.read_csv('model_results_2.csv')
     model_results = (model_results.merge(data_df, on='File_Name', how='left'))
-    # plot_results(model, folder, test_df, model_results)
-
+    plot_results(model, folder, test_df, model_results)
+    
     # Create scatterplots
     plt.figure()
     plt.title("PSNR vs. SSIM")
     plt.scatter(model_results['PSNR'], model_results['SSIM'])
     plt.xlabel("PSNR")
     plt.ylabel("SSIM")
-    plt.savefig(os.path.join('results', 'PSNRvsSSIM.png'))
+    plt.savefig(os.path.join('results_2', 'PSNRvsSSIM.png'))
     plt.show()
 
     plt.figure()
@@ -365,7 +368,7 @@ def main():
     plt.scatter(model_results['MSE'], model_results['PSNR'])
     plt.xlabel("MSE")
     plt.ylabel("PSNR")
-    plt.savefig(os.path.join('results', 'MSEvsPSNR.png'))
+    plt.savefig(os.path.join('results_2', 'MSEvsPSNR.png'))
     plt.show()
 
     plt.figure()
@@ -373,7 +376,7 @@ def main():
     plt.scatter(model_results['MSE'], model_results['SSIM'])
     plt.xlabel("MSE")
     plt.ylabel("SSIM")
-    plt.savefig(os.path.join('results', 'MSEvsSSIM.png'))
+    plt.savefig(os.path.join('results_2', 'MSEvsSSIM.png'))
     plt.show()
 
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
