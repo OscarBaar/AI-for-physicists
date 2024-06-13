@@ -169,8 +169,8 @@ def infer_all(model, data_folder, df):
     Returns:
         None
     """
-    (err_list, similarity_list, mse_list, similarity_mse_list,
-     psnr_list, ssim_list, inference_times) = [], [], [], [], [], [], []
+    (err_list, similarity_list, mse_list, similarity_mse_list, psnr_list,
+     ssim_list, encode_times, decode_times) = [], [], [], [], [], [], [], []
 
     for file_name in df["File_Name"]:
         print(file_name)
@@ -181,8 +181,8 @@ def infer_all(model, data_folder, df):
 
         # Get prediction
         prediction, encode_time, decode_time = get_prediction(model, image_tensor, device)
-        total_inference_time = encode_time + decode_time
-        inference_times.append(total_inference_time)
+        encode_times.append(encode_time)
+        decode_times.append(decode_time)
 
         mse = calculate_mse(image, prediction)
         err = np.mean(np.abs(image - prediction))
@@ -205,7 +205,8 @@ def infer_all(model, data_folder, df):
     print(f"Mean MSE similarity: {np.mean(similarity_mse_list)}")
     print(f"Mean PSNR: {np.mean(psnr_list)}")
     print(f"Mean SSIM: {np.mean(ssim_list)}")
-    print(f"Mean inference time: {np.mean(inference_times)} seconds")
+    print(f"Mean encode time: {np.mean(encode_times)} seconds")
+    print(f"Mean decode time: {np.mean(decode_time)} seconds")
 
     # Create DataFrame to store results along with inference times
     model_results = pd.DataFrame({
@@ -216,7 +217,8 @@ def infer_all(model, data_folder, df):
         "Similarity_MSE": similarity_mse_list,
         "PSNR": psnr_list,
         "SSIM": ssim_list,
-        "Inference_Time": inference_times
+        "Encode_Time": encode_times,
+        "Decode_Time": decode_times
     })
 
     model_results.to_csv('model_results_2.csv', index=False)
