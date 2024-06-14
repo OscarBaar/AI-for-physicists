@@ -24,10 +24,17 @@ def load_model(weights_path, encoder, decoder, device='cpu'):
         model (torch.nn.Module): The loaded model.
     """
     model = Autoencoder(encoder, decoder)
-    map_location = torch.device(device) if torch.cuda.is_available() and 'cuda' in device else torch.device('cpu')
+
+    if torch.cuda.is_available() and 'cuda' in device:
+        model = model.cuda()
+        map_location = torch.device(device)
+    else:
+        map_location = torch.device('cpu')
+
     model.load_state_dict(torch.load(weights_path, map_location=map_location))
     model.to(map_location)
     model.eval()
+
     return model
 
 
@@ -329,7 +336,7 @@ def main():
     weights = "best_model.pth"
     encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
     decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
-    model = load_model(weights, encoder, decoder)
+    model = load_model(weights, encoder, decoder, device='cuda')
 
     # Load data
     data_df = pd.read_csv(os.path.join(folder, "file_info.csv"))
