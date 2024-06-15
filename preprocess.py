@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import SimpleITK as sitk
 
+
 def resize_scan(scan, target_size=400, pad_value=-1024):
     """
     Resize a 3D numpy array in the x and y dimensions to a fixed size.
@@ -35,7 +36,7 @@ def resize_scan(scan, target_size=400, pad_value=-1024):
     return new_scan
 
 
-def split_scan(scan, file_name, output_dir='data_2d/'):
+def split_scan(scan, file_name, output_dir='data/'):
     """
     Split a resized 3D numpy array into individual 2D images of size 400x400,
     save each image as a separate file, and create a DataFrame containing information
@@ -63,6 +64,9 @@ def split_scan(scan, file_name, output_dir='data_2d/'):
     for i, slice_2d in enumerate(scan):
         slice_file_name = f'img_{file_idx}_slice_{i}.npy'
 
+        # Cap maximum and minimum voxel values
+        slice_2d[slice_2d < -1000] = -1000
+        slice_2d[slice_2d > 3000] = 3000
         np.save(os.path.join(output_dir, slice_file_name), slice_2d)
 
         # Store information about the slice
@@ -88,34 +92,21 @@ def split_scan(scan, file_name, output_dir='data_2d/'):
 
     return file_info
 
-def get_mhd_files(directory):
-    """Retrieve full paths to all MHD files within the subdirectories of the given directory."""
-    mhd_files = []
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith('.mhd'):
-                mhd_files.append(os.path.join(root, file))
-    return mhd_files
-
-def load_scan(file_path):
-    """Load a scan from a MHD file."""
-    return sitk.ReadImage(file_path)
 
 def resample_scan(scan, target_spacing):
-    """Resample a SimpleITK image to the specified target spacing.
+    """
+    Resample a SimpleITK image to the specified target spacing.
     
     Parameters:
-    scan (sitk.Image): The input image to be resampled.
-    target_spacing (list): The target spacing for the resampled image.
+        scan (np.ndarray): The input image to be resampled.
+        target_spacing (list): The target spacing for the resampled image.
 
     Returns:
-    resampled_img (sitk.Image): The resampled image.
-
+        resampled_img (np.ndarray): The resampled image.
     """
-
-
-    original_spacing = scan.GetSpacing()
-    original_size = scan.GetSize()
+    image = sitk.GetImageFromArray(scan)
+    original_spacing = image.GetSpacing()
+    original_size = image.GetSize()
    
     new_size = [int(round(osz * ospz / tspz)) for osz, ospz, tspz in 
                 zip(original_size, original_spacing, target_spacing)]
@@ -125,35 +116,35 @@ def resample_scan(scan, target_spacing):
     resampler.SetOutputSpacing(target_spacing)
     resampler.SetInterpolator(sitk.sitkLinear)
     resampler.SetTransform(sitk.Transform(3, sitk.sitkIdentity))
-    resampler.SetOutputOrigin(scan.GetOrigin())
-    resampler.SetOutputDirection(scan.GetDirection())
+    resampler.SetOutputOrigin(image.GetOrigin())
+    resampler.SetOutputDirection(image.GetDirection())
 
     resampled_img = resampler.Execute(scan)
-    return resampled_img
+    return sitk.GetArrayFromImage(resampled_img)
 
-if __name__ == "__main__":
+
+def main():
+    resample = False
     folder = "lung_cts/"
     dfs = []
     for file in os.listdir(folder):
         if not file.endswith(".npy"):
             continue
 
-        scan = np.load(folder + file)
+        scan = np.load(os.path.join(folder, file))
+
+        if resample:
+            target_resolution = [1.0, 1.0, 1.0]
+            scan = resample_scan(scan, target_resolution)
+
         resized_scan = resize_scan(scan)
         df = split_scan(resized_scan, file)
         dfs.append(df)
-
-        print(file, scan.shape)
-
         del scan, resized_scan
 
     merged_df = pd.concat(dfs, ignore_index=True)
-    merged_df.to_csv('data_2d/file_info.csv', index=False)
+    merged_df.to_csv('data/file_info.csv', index=False)
 
-target_resolution = [1.0, 1.0, 1.0]  # mm per voxel
 
-# Resample each scan
-resampled_scans = [resample_scan(scan, target_resolution) for scan in scans]
-
-# resampled numpy images
-numpy_images = [sitk.GetArrayFromImage(resampled_scan) for resampled_scan in resampled_scans]
+if __name__ == "__main__":
+    main()

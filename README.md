@@ -45,3 +45,4 @@ Each step is designed to be modular, allowing for adjustments and improvements s
 
 
 # Individual Contribution
+- Hamdi had access to a 

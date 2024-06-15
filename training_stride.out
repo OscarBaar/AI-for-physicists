@@ -1,139 +1,0 @@
-cuda:0
-  0%|          | 0/50 [00:00<?, ?it/s]  2%|▏         | 1/50 [00:59<48:13, 59.05s/it]  4%|▍         | 2/50 [01:55<46:05, 57.61s/it]  6%|▌         | 3/50 [02:48<43:26, 55.46s/it]  8%|▊         | 4/50 [03:41<41:41, 54.39s/it] 10%|█         | 5/50 [04:32<40:02, 53.39s/it] 12%|█▏        | 6/50 [05:25<38:56, 53.11s/it] 14%|█▍        | 7/50 [06:18<38:04, 53.13s/it] 16%|█▌        | 8/50 [07:09<36:44, 52.49s/it] 18%|█▊        | 9/50 [08:01<35:47, 52.38s/it] 20%|██        | 10/50 [08:55<35:07, 52.69s/it] 22%|██▏       | 11/50 [09:46<33:52, 52.12s/it] 24%|██▍       | 12/50 [10:38<33:03, 52.19s/it] 26%|██▌       | 13/50 [11:32<32:27, 52.62s/it] 28%|██▊       | 14/50 [12:23<31:25, 52.38s/it] 30%|███       | 15/50 [13:15<30:27, 52.21s/it] 32%|███▏      | 16/50 [14:09<29:46, 52.54s/it] 34%|███▍      | 17/50 [15:00<28:41, 52.17s/it] 36%|███▌      | 18/50 [15:53<28:01, 52.54s/it] 38%|███▊      | 19/50 [16:48<27:33, 53.35s/it] 40%|████      | 20/50 [17:41<26:29, 52.99s/it] 42%|████▏     | 21/50 [18:34<25:39, 53.07s/it] 44%|████▍     | 22/50 [19:27<24:43, 52.97s/it] 46%|████▌     | 23/50 [20:19<23:47, 52.87s/it] 48%|████▊     | 24/50 [21:13<22:58, 53.03s/it] 50%|█████     | 25/50 [22:06<22:09, 53.19s/it] 52%|█████▏    | 26/50 [22:59<21:11, 52.99s/it] 54%|█████▍    | 27/50 [23:53<20:30, 53.51s/it] 56%|█████▌    | 28/50 [24:47<19:34, 53.38s/it] 58%|█████▊    | 29/50 [25:38<18:30, 52.87s/it] 60%|██████    | 30/50 [26:33<17:49, 53.47s/it] 62%|██████▏   | 31/50 [27:27<16:55, 53.46s/it] 64%|██████▍   | 32/50 [28:18<15:53, 52.97s/it] 66%|██████▌   | 33/50 [29:12<15:04, 53.21s/it] 68%|██████▊   | 34/50 [30:06<14:15, 53.47s/it] 70%|███████   | 35/50 [30:57<13:07, 52.52s/it] 72%|███████▏  | 36/50 [31:51<12:21, 52.99s/it] 74%|███████▍  | 37/50 [32:44<11:31, 53.20s/it] 76%|███████▌  | 38/50 [33:36<10:32, 52.69s/it] 78%|███████▊  | 39/50 [34:30<09:45, 53.23s/it] 80%|████████  | 40/50 [35:24<08:54, 53.43s/it] 82%|████████▏ | 41/50 [36:15<07:53, 52.64s/it] 84%|████████▍ | 42/50 [37:08<07:02, 52.75s/it] 86%|████████▌ | 43/50 [38:01<06:10, 52.89s/it] 88%|████████▊ | 44/50 [38:54<05:17, 52.91s/it] 90%|█████████ | 45/50 [39:48<04:26, 53.23s/it] 92%|█████████▏| 46/50 [40:41<03:32, 53.04s/it] 94%|█████████▍| 47/50 [41:35<02:40, 53.47s/it] 96%|█████████▌| 48/50 [42:28<01:46, 53.25s/it] 98%|█████████▊| 49/50 [43:18<00:52, 52.40s/it]100%|██████████| 50/50 [44:12<00:00, 52.71s/it]100%|██████████| 50/50 [44:12<00:00, 53.05s/it]
-Epoch 1, Train Loss: 0.245378
-Epoch 1, Val Loss: 0.229776
-Model saved
-Epoch 2, Train Loss: 0.207091
-Epoch 2, Val Loss: 0.170907
-Model saved
-Epoch 3, Train Loss: 0.128038
-Epoch 3, Val Loss: 0.100539
-Model saved
-Epoch 4, Train Loss: 0.088507
-Epoch 4, Val Loss: 0.076420
-Model saved
-Epoch 5, Train Loss: 0.070506
-Epoch 5, Val Loss: 0.064896
-Model saved
-Epoch 6, Train Loss: 0.057897
-Epoch 6, Val Loss: 0.055878
-Model saved
-Epoch 7, Train Loss: 0.053028
-Epoch 7, Val Loss: 0.051554
-Model saved
-Epoch 8, Train Loss: 0.048782
-Epoch 8, Val Loss: 0.047683
-Model saved
-Epoch 9, Train Loss: 0.044948
-Epoch 9, Val Loss: 0.044085
-Model saved
-Epoch 10, Train Loss: 0.042600
-Epoch 10, Val Loss: 0.041921
-Model saved
-Epoch 11, Train Loss: 0.038347
-Epoch 11, Val Loss: 0.038981
-Model saved
-Epoch 12, Train Loss: 0.036603
-Epoch 12, Val Loss: 0.037162
-Model saved
-Epoch 13, Train Loss: 0.035795
-Epoch 13, Val Loss: 0.036950
-Model saved
-Epoch 14, Train Loss: 0.034414
-Epoch 14, Val Loss: 0.036046
-Model saved
-Epoch 15, Train Loss: 0.033730
-Epoch 15, Val Loss: 0.034274
-Model saved
-Epoch 16, Train Loss: 0.031607
-Epoch 16, Val Loss: 0.032840
-Model saved
-Epoch 17, Train Loss: 0.030974
-Epoch 17, Val Loss: 0.032538
-Model saved
-Epoch 18, Train Loss: 0.030343
-Epoch 18, Val Loss: 0.031505
-Model saved
-Epoch 19, Train Loss: 0.030001
-Epoch 19, Val Loss: 0.031690
-Epoch 20, Train Loss: 0.029414
-Epoch 20, Val Loss: 0.031276
-Model saved
-Epoch 21, Train Loss: 0.028375
-Epoch 21, Val Loss: 0.030204
-Model saved
-Epoch 22, Train Loss: 0.028008
-Epoch 22, Val Loss: 0.029927
-Model saved
-Epoch 23, Train Loss: 0.027559
-Epoch 23, Val Loss: 0.029857
-Model saved
-Epoch 24, Train Loss: 0.027423
-Epoch 24, Val Loss: 0.029359
-Model saved
-Epoch 25, Train Loss: 0.027084
-Epoch 25, Val Loss: 0.029240
-Model saved
-Epoch 26, Train Loss: 0.026584
-Epoch 26, Val Loss: 0.028853
-Model saved
-Epoch 27, Train Loss: 0.026196
-Epoch 27, Val Loss: 0.028432
-Model saved
-Epoch 28, Train Loss: 0.026099
-Epoch 28, Val Loss: 0.028359
-Model saved
-Epoch 29, Train Loss: 0.025951
-Epoch 29, Val Loss: 0.028583
-Epoch 30, Train Loss: 0.025825
-Epoch 30, Val Loss: 0.028407
-Epoch 31, Train Loss: 0.025519
-Epoch 31, Val Loss: 0.028026
-Model saved
-Epoch 32, Train Loss: 0.025389
-Epoch 32, Val Loss: 0.028006
-Model saved
-Epoch 33, Train Loss: 0.025283
-Epoch 33, Val Loss: 0.028082
-Epoch 34, Train Loss: 0.025283
-Epoch 34, Val Loss: 0.027803
-Model saved
-Epoch 35, Train Loss: 0.025114
-Epoch 35, Val Loss: 0.027561
-Model saved
-Epoch 36, Train Loss: 0.025056
-Epoch 36, Val Loss: 0.027897
-Epoch 37, Train Loss: 0.024982
-Epoch 37, Val Loss: 0.027605
-Epoch 38, Train Loss: 0.024963
-Epoch 38, Val Loss: 0.027539
-Model saved
-Epoch 39, Train Loss: 0.024926
-Epoch 39, Val Loss: 0.027663
-Epoch 40, Train Loss: 0.024716
-Epoch 40, Val Loss: 0.027512
-Model saved
-Epoch 41, Train Loss: 0.024683
-Epoch 41, Val Loss: 0.027807
-Epoch 42, Train Loss: 0.024754
-Epoch 42, Val Loss: 0.027443
-Model saved
-Epoch 43, Train Loss: 0.024712
-Epoch 43, Val Loss: 0.027779
-Epoch 44, Train Loss: 0.024658
-Epoch 44, Val Loss: 0.027562
-Epoch 45, Train Loss: 0.024670
-Epoch 45, Val Loss: 0.027329
-Model saved
-Epoch 46, Train Loss: 0.024615
-Epoch 46, Val Loss: 0.027428
-Epoch 47, Train Loss: 0.024602
-Epoch 47, Val Loss: 0.027491
-Epoch 48, Train Loss: 0.024551
-Epoch 48, Val Loss: 0.027313
-Model saved
-Epoch 49, Train Loss: 0.024546
-Epoch 49, Val Loss: 0.027425
-Epoch 50, Train Loss: 0.024611
-Epoch 50, Val Loss: 0.027285
-Model saved

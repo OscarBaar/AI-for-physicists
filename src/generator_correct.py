@@ -45,19 +45,16 @@ class DataGenerator(Dataset):
 
     def __data_generation(self, list_IDs_temp):
         # Generates data containing batch_size samples.
-        
         X = np.empty((self.batch_size, *self.input_dim))
         y = np.empty((self.batch_size, *self.input_dim))
         
         for i, list_ID in enumerate(list_IDs_temp):
             try:
                 file_path = os.path.join(self.path, list_ID)
-                num_rot= np.random.randint(0, 3)
+                num_rot = np.random.randint(0, 3)
                 # Store sample
                 file = np.load(file_path)
-
-                file= np.rot90(file, num_rot)
-                
+                file = np.rot90(file, num_rot)
 
                 X[i,] = (file - self.x_min) / (self.x_max - self.x_min)
                 y[i,] = (file - self.x_min) / (self.x_max - self.x_min)

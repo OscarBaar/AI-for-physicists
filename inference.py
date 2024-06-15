@@ -12,16 +12,16 @@ import matplotlib.pyplot as plt
 
 def load_model(weights_path, encoder, decoder, device='cpu'):
     """
-    Function to load a pre-trained model.
+    Function to load a pre-trained old_model.
 
     Parameters:
-        weights_path (string): Path to the model weights.
-        encoder (torch.nn.Module): The encoder model. 
-        decoder (torch.nn.Module): The decoder model.
-        device (string): The device to load the model on.
+        weights_path (string): Path to the old_model weights.
+        encoder (torch.nn.Module): The encoder old_model.
+        decoder (torch.nn.Module): The decoder old_model.
+        device (string): The device to load the old_model on.
 
     Returns:
-        model (torch.nn.Module): The loaded model.
+        old_model (torch.nn.Module): The loaded old_model.
     """
     model = Autoencoder(encoder, decoder)
 
@@ -63,12 +63,12 @@ def get_prediction(model, image_tensor, device):
     Function to get a prediction from a model.
 
     Parameters:
-        model (torch.nn.Module): The model to use for prediction.
+        model (torch.nn.Module): The old_model to use for prediction.
         image_tensor (torch.Tensor): The input image tensor.
         device (string): The device to use for prediction.
 
     Returns:
-        output (numpy.ndarray): The model's prediction.
+        output (numpy.ndarray): The old_model's prediction.
         encode_time (float): Time taken to encode the image.
         decode_time (float): Time taken to decode the image.
     """
@@ -164,13 +164,13 @@ def calculate_ssim(img1, img2, max_pixel_value=1.0, k1=0.01, k2=0.03):
     return ssim_map.mean()
 
 
-def infer_all(model, data_folder, df, device):
+def infer_all(model, folder, df, device):
     """
-    Apply the model to all images from df,
+    Apply the old_model to all images from df,
 
     Parameters:
-        model (torch.model): The autoencoder model to be used for inference.
-        data_folder (string): Folder containing the original images.
+        model (torch.old_model): The autoencoder old_model to be used for inference.
+        folder (string): Folder containing the original images.
         df (pd.DataFrame): Information about the original images.
         device (string): The device to use for prediction.
 
@@ -180,9 +180,9 @@ def infer_all(model, data_folder, df, device):
     (err_list, similarity_list, mse_list, similarity_mse_list, psnr_list,
      ssim_list, encode_times, decode_times) = [], [], [], [], [], [], [], []
 
-    for file_name in df["File_Name"]:
+    for file_name in df['File_Name']:
         print(file_name)
-        image = np.load(os.path.join(data_folder, file_name))
+        image = np.load(os.path.join(folder, file_name))
         image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
         image_tensor = preprocess_image(image)
 
@@ -205,39 +205,39 @@ def infer_all(model, data_folder, df, device):
         psnr_list.append(psnr)
         ssim_list.append(ssim)
 
-    print("Evaluation Results:")
-    print(f"Mean error: {np.mean(err_list)}")
-    print(f"Mean similarity: {np.mean(similarity_list)}")
-    print(f"Mean MSE: {np.mean(mse_list)}")
-    print(f"Mean MSE similarity: {np.mean(similarity_mse_list)}")
-    print(f"Mean PSNR: {np.mean(psnr_list)}")
-    print(f"Mean SSIM: {np.mean(ssim_list)}")
-    print(f"Mean encode time: {np.mean(encode_times)} seconds")
-    print(f"Mean decode time: {np.mean(decode_times)} seconds")
+    print('Evaluation Results:')
+    print(f'Mean error: {np.mean(err_list)}')
+    print(f'Mean similarity: {np.mean(similarity_list)}')
+    print(f'Mean MSE: {np.mean(mse_list)}')
+    print(f'Mean MSE similarity: {np.mean(similarity_mse_list)}')
+    print(f'Mean PSNR: {np.mean(psnr_list)}')
+    print(f'Mean SSIM: {np.mean(ssim_list)}')
+    print(f'Mean encode time: {np.mean(encode_times)} seconds')
+    print(f'Mean decode time: {np.mean(decode_times)} seconds')
 
     # Create DataFrame to store results along with inference times
     model_results = pd.DataFrame({
-        "File_Name": df["File_Name"],
-        "Error": err_list,
-        "Similarity": similarity_list,
-        "MSE": mse_list,
-        "Similarity_MSE": similarity_mse_list,
-        "PSNR": psnr_list,
-        "SSIM": ssim_list,
-        "Encode_Time": encode_times,
-        "Decode_Time": decode_times
+        'File_Name': df['File_Name'],
+        'Error': err_list,
+        'Similarity': similarity_list,
+        'MSE': mse_list,
+        'Similarity_MSE': similarity_mse_list,
+        'PSNR': psnr_list,
+        'SSIM': ssim_list,
+        'Encode_Time': encode_times,
+        'Decode_Time': decode_times
     })
 
-    model_results.to_csv('model_results_2.csv', index=False)
+    model_results.to_csv(os.path.join('results', 'model_results.csv'), index=False)
 
 
 def plot_images(original_images, predictions, titles, file_info):
     """
-    Plots best and worst results of the model according to different parameters.
+    Plots best and worst results of the old_model according to different parameters.
 
     Parameters:
         original_images (list of np.ndarray): List of original images.
-        predictions (list of np.ndarray): List of predicted images by the model.
+        predictions (list of np.ndarray): List of predicted images by the old_model.
         titles (list of str): List of titles for the plots.
         file_info (list of dict): List of dictionaries containing detailed information about each image.
 
@@ -264,23 +264,21 @@ def plot_images(original_images, predictions, titles, file_info):
         info = file_info[i]
         max_length = max(len(name) for name in info.keys())
         for name, value in info.items():
-            print(f"{name:<{max_length}}: {value}")
+            print(f'{name:<{max_length}}: {value}')
         print('\n')
 
     plt.tight_layout()
-    os.makedirs('results_2', exist_ok=True)
-
-    plt.savefig(os.path.join(extract_file_name(titles[0])))
+    plt.savefig(os.path.join('results', extract_file_name(titles[0])))
     plt.show()
 
 
-def plot_results(model, data_folder, file_df, results_df, device):
+def plot_results(model, folder, file_df, results_df, device):
     """
-    Plots best and worst results of the model according to different parameters.
+    Plots best and worst results of the old_model according to different parameters.
 
     Parameters:
-        model (torch.model): The autoencoder model to be used for inference.
-        data_folder (string): Folder containing the original images.
+        model (torch.old_model): The autoencoder old_model to be used for inference.
+        folder (string): Folder containing the original images.
         file_df (pd.DataFrame): Information about the original images.
         results_df (pd.DataFrame): Information about the inference results.
         device (string): The device to use for prediction.
@@ -301,8 +299,8 @@ def plot_results(model, data_folder, file_df, results_df, device):
         # Get results of highest values
         images_high, predictions_high, titles_high, file_info_high = [], [], [], []
         for idx, row in highest_val.iterrows():
-            file_name = row["File_Name"]
-            image = np.load(os.path.join(data_folder, file_name))
+            file_name = row['File_Name']
+            image = np.load(os.path.join(folder, file_name))
             image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
             image_tensor = preprocess_image(image)
             prediction, _, _ = get_prediction(model, image_tensor, device)
@@ -318,13 +316,11 @@ def plot_results(model, data_folder, file_df, results_df, device):
         # Get results of lowest values
         images_low, predictions_low, titles_low, file_info_low = [], [], [], []
         for idx, row in lowest_val.iterrows():
-            file_name = row["File_Name"]
-            image = np.load(os.path.join(data_folder, file_name))
+            file_name = row['File_Name']
+            image = np.load(os.path.join(folder, file_name))
             image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
             image_tensor = preprocess_image(image)
             prediction, _, _ = get_prediction(model, image_tensor, device)
-            os.makedirs('predictions', exist_ok=True)
-            np.save(os.path.join('predictions', 'pred_'+file_name), prediction)
 
             images_low.append(image)
             predictions_low.append(prediction[0, 0, :, :])
@@ -340,17 +336,71 @@ def plot_results(model, data_folder, file_df, results_df, device):
         plot_images(images_low, predictions_low, titles_low, file_info_low)
 
 
+def create_scatterplots(results, folder):
+    """
+    Plots scatterplots of important observables to show correlations.
+
+    Parameters:
+        results (pd.DataFrame): Information about the inference results.
+        folder (string): Destination folder to save the plots to.
+
+    Returns:
+        None
+    """
+    plt.figure()
+    plt.title('PSNR vs. SSIM')
+    plt.scatter(results['PSNR'], results['SSIM'])
+    plt.xlabel('PSNR')
+    plt.ylabel('SSIM')
+    plt.savefig(os.path.join(folder, 'PSNRvsSSIM.png'))
+    plt.show()
+
+    plt.figure()
+    plt.title('MSE vs. PSNR')
+    plt.scatter(results['MSE'], results['PSNR'])
+    plt.xlabel('MSE')
+    plt.ylabel('PSNR')
+    plt.savefig(os.path.join(folder, 'MSEvsPSNR.png'))
+    plt.show()
+
+    plt.figure()
+    plt.title('MSE vs. SSIM')
+    plt.scatter(results['MSE'], results['SSIM'])
+    plt.xlabel('MSE')
+    plt.ylabel('SSIM')
+    plt.savefig(os.path.join(folder, 'MSEvsSSIM.png'))
+    plt.show()
+
+    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+    ax[0].scatter(results['Mean_Value'], results['SSIM'], label='SSIM')
+    ax[0].set_xlabel('Mean Intensity (HU)')
+    ax[0].set_ylabel('SSIM')
+
+    ax[1].scatter(results['Mean_Value'], results['PSNR'], label='PSNR')
+    ax[1].set_xlabel('Mean Intensity (HU)')
+    ax[1].set_ylabel('PSNR')
+
+    ax[2].scatter(results['Mean_Value'], results['MSE'], label='MSE')
+    ax[2].set_xlabel('Mean Intensity (HU)')
+    ax[2].set_ylabel('MSE')
+
+    fig.tight_layout()
+    fig.savefig(os.path.join(folder, 'Intensity.png'))
+    fig.show()
+
+
 def main():
-    folder = "data_2d"
-    weights = "best_model.pth"
     device = 'cuda'
+    data_folder = 'data'
+    results_folder = 'results'
+    weights = os.path.join('training', 'best_model.pth')
     encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
     decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
     model = load_model(weights, encoder, decoder, device)
 
     # Load data
-    data_df = pd.read_csv(os.path.join(folder, "file_info.csv"))
-    data_df = data_df[data_df["Max_Value"] > 300]
+    data_df = pd.read_csv(os.path.join(data_folder, 'file_info.csv'))
+    data_df = data_df[data_df['Max_Value'] > 300]
     
     # Split data to ensure using only test data
     train_split, val_split, test_split = 0.7, 0.15, 0.15
@@ -363,57 +413,17 @@ def main():
 
     test_ids = list_ids[num_train + num_val:]
     test_df = data_df[data_df['File_Name'].isin(test_ids)]
-    print(len(test_df))
 
     # Apply inference to all images
-    infer_all(model, folder, test_df, device)
+    infer_all(model, data_folder, test_df, device)
 
     # Plot best and worst performing images
-    model_results = pd.read_csv('model_results_2.csv')
+    model_results = pd.read_csv(os.path.join(results_folder, 'model_results.csv'))
     model_results = (model_results.merge(data_df, on='File_Name', how='left'))
-    plot_results(model, folder, test_df, model_results, device)
+    plot_results(model, data_folder, test_df, model_results, device)
     
-    # Create scatterplots
-    plt.figure()
-    plt.title("PSNR vs. SSIM")
-    plt.scatter(model_results['PSNR'], model_results['SSIM'])
-    plt.xlabel("PSNR")
-    plt.ylabel("SSIM")
-    plt.savefig(os.path.join('results_2', 'PSNRvsSSIM.png'))
-    plt.show()
-
-    plt.figure()
-    plt.title("MSE vs. PSNR")
-    plt.scatter(model_results['MSE'], model_results['PSNR'])
-    plt.xlabel("MSE")
-    plt.ylabel("PSNR")
-    plt.savefig(os.path.join('results_2', 'MSEvsPSNR.png'))
-    plt.show()
-
-    plt.figure()
-    plt.title("MSE vs. SSIM")
-    plt.scatter(model_results['MSE'], model_results['SSIM'])
-    plt.xlabel("MSE")
-    plt.ylabel("SSIM")
-    plt.savefig(os.path.join('results_2', 'MSEvsSSIM.png'))
-    plt.show()
-
-    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
-    ax[0].scatter(model_results['Mean_Value'], model_results['SSIM'], label="SSIM")
-    ax[0].set_xlabel("Mean Intensity (HU)")
-    ax[0].set_ylabel("SSIM")
-
-    ax[1].scatter(model_results['Mean_Value'], model_results['PSNR'], label="PSNR")
-    ax[1].set_xlabel("Mean Intensity (HU)")
-    ax[1].set_ylabel("PSNR")
-
-    ax[2].scatter(model_results['Mean_Value'], model_results['MSE'], label="MSE")
-    ax[2].set_xlabel("Mean Intensity (HU)")
-    ax[2].set_ylabel("MSE")
-
-    fig.tight_layout()
-    fig.savefig("Intensity.png")
-    fig.show()
+    # Scatterplots
+    create_scatterplots(model_results, results_folder)
 
 
 if __name__ == "__main__":

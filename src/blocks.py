@@ -1,19 +1,6 @@
-import warnings # ignore future warnings for now
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
-from pathlib import Path 
-
-import numpy as np
-import pandas as pd
-import random
-
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
-import torch # pytorch library
-import torch.nn as nn # neural network module
-
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)  # Ignore future warnings for now
 
 
 class ConvEncoder(nn.Module):
@@ -33,8 +20,6 @@ class ConvEncoder(nn.Module):
         strides (int): Stride size for convolutional layers. Default is 1.
         pooling (int): Size of the pooling window and stride. Default is 2.
     """
-
-    
     def __init__(self, num_channels=64, kernel_size=5, strides=1, pooling=2):
         super(ConvEncoder, self).__init__()
 
@@ -61,35 +46,37 @@ class ConvEncoder(nn.Module):
         # Activation layers
         self.activation = nn.ReLU()
 
-
     def forward(self, tokens):
-
         # First convolutional block
-
-        x = self.conv1(tokens) #Input shape: (batch_size, 1, 400, 400)
+        # Input shape: (batch_size, 1, 400, 400)
+        # Output shape: (batch_size, num_channels, 200, 200)
+        x = self.conv1(tokens)
         x = self.norm1(x)
         x = self.activation(x)
-        x = self.pool(x)  #Output shape: (batch_size, num_channels, 200, 200)
+        x = self.pool(x)
        
         # Second convolutional block
-
-        x = self.conv2(x)  #Input shape: (batch_size, num_channels, 200, 200)
+        # Input shape: (batch_size, num_channels, 200, 200)
+        # Output shape: (batch_size, num_channels, 100, 100)
+        x = self.conv2(x)
         x = self.norm2(x)
         x = self.activation(x)
-        x= self.pool(x)  #Output shape: (batch_size, num_channels, 100, 100)
+        x = self.pool(x)
          
         # Third convolutional block
-
-        x = self.conv3(x) #Input shape: (batch_size, num_channels, 100, 100)
+        # Input shape: (batch_size, num_channels, 100, 100)
+        # Output shape: (batch_size, num_channels, 50, 50)
+        x = self.conv3(x)
         x = self.norm3(x)
         x = self.activation(x)
-        x = self.pool(x)  #Output shape: (batch_size, num_channels, 50, 50)
+        x = self.pool(x)
         
         # Final convolutional block
-        x = self.conv4(x) #Input shape: (batch_size, num_channels, 50, 50)
+        # Input shape: (batch_size, num_channels, 50, 50)
+        # Output shape: (batch_size, num_channels, 50, 50)
+        x = self.conv4(x)
         x = self.norm4(x)
-        x = self.activation(x) #Output shape: (batch_size, num_channels, 50, 50)
-
+        x = self.activation(x)
 
         return x
 
@@ -153,33 +140,42 @@ class ConvDecoder(nn.Module):
 
     def forward(self, x):
         # First convolutional block
+        # Input shape: (batch_size, num_channels, 50, 50) , Output shape: (batch_size, num_channels, 100, 100)
+        x = self.h1(self.norm1(self.conv1(x)))
 
-        x = self.h1(self.norm1(self.conv1(x)))   #Input shape: (batch_size, num_channels, 50, 50) , Output shape: (batch_size, num_channels, 100, 100)
         # Second convolutional block
-        x = self.h2(self.norm2(self.conv2(x))) #Input shape: (batch_size, num_channels, 100, 100) , Output shape: (batch_size, num_channels, 200, 200)
+        # Input shape: (batch_size, num_channels, 100, 100) , Output shape: (batch_size, num_channels, 200, 200)
+        x = self.h2(self.norm2(self.conv2(x)))
 
         # Third convolutional block
-        x = self.h3(self.norm3(self.conv3(x))) #Input shape: (batch_size, num_channels, 200, 200) , Output shape: (batch_size, num_channels, 400, 400)
+        # Input shape: (batch_size, num_channels, 200, 200) , Output shape: (batch_size, num_channels, 400, 400)
+        x = self.h3(self.norm3(self.conv3(x)))
 
         # Output convolution
-        x = self.conv4(x) #Input shape: (batch_size, num_channels, 400, 400) , Output shape: (batch_size, 1, 400, 400)
+        # Input shape: (batch_size, num_channels, 400, 400) , Output shape: (batch_size, 1, 400, 400)
+        x = self.conv4(x)
 
         return x
+
+
 class Autoencoder(nn.Module):
 
     """
-    Autoencoder model consisting of an encoder and a decoder.
+    Autoencoder old_model consisting of an encoder and a decoder.
 
     Args:
-        encoder (nn.Module): Encoder model instance.
-        decoder (nn.Module): Decoder model instance.
+        encoder (nn.Module): Encoder old_model instance.
+        decoder (nn.Module): Decoder old_model instance.
     """
     def __init__(self, encoder, decoder):
         super(Autoencoder, self).__init__()
         self.encoder = encoder
         self.decoder = decoder
 
-    def forward(self, x): 
-        latent_space = self.encoder(x) #Input shape: (batch_size, 1, 400, 400) , Output shape: (batch_size, num_channels, 50, 50)
-        reconstructed = self.decoder(latent_space) #Input shape: (batch_size, num_channels, 50, 50) , Output shape: (batch_size, 1, 400, 400)
+    def forward(self, x):
+        # Input shape: (batch_size, 1, 400, 400), Output shape: (batch_size, num_channels, 50, 50)
+        latent_space = self.encoder(x)
+
+        # Input shape: (batch_size, num_channels, 50, 50) , Output shape: (batch_size, 1, 400, 400)
+        reconstructed = self.decoder(latent_space)
         return reconstructed
