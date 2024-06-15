@@ -1,14 +1,11 @@
 import os
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from tqdm import tqdm
 import pickle
-from src.generator_correct import DataGenerator
+from src.generator import DataGenerator
 from src.blocks import Autoencoder, ConvDecoder, ConvEncoder
 from torch.optim.lr_scheduler import StepLR
 

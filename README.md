@@ -31,18 +31,20 @@ Each step is designed to be modular, allowing for adjustments and improvements s
 
 # Contents
 
-
-### blocks.py
-
-### generator_correct.py
-
-
-### model.py
-
-### []
-
-### []
+- **data:** folder containing preprocessed 2D slices to be used to train the model.
+- **results:** folder containing plots and images that visualize the accuracy and performance of the model.
+- **src:** folder containing source code of the model.
+  - *blocks.py:* blocks like encoder, decoder, and autoencoder used in the model.
+  - *generator.py:* ...
+  - *model.py:* ...
+- **training:** folder containing files related to the training of the model. 
+  - *train.py:* ...
+  - *train_perceptual_loss.py:* ...
+  - *best_model.pth:* ...
+  - *train_loss.pkl:* ...
+  - *val_loss.pkl:* ...
+- **preprocess.py:** file used to transform raw data into 2D images that can be used as input data for the model.
+- **inference.py:**
 
 
 # Individual Contribution
-- Hamdi had access to a 

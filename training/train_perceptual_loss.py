@@ -11,7 +11,7 @@ from torchvision.models import vgg16
 from torch.nn import functional as F
 from tqdm import tqdm
 import pickle
-from src.generator_correct import DataGenerator
+from src.generator import DataGenerator
 from src.blocks import Autoencoder, ConvDecoder, ConvEncoder
 from torch.optim.lr_scheduler import StepLR
 

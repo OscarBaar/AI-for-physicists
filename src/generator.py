@@ -1,58 +1,68 @@
-import torch
 import numpy as np
-import matplotlib.pyplot as plt
-import random
 import os
+import torch
+from torch.utils.data import Dataset
 
 
-def load_img(file_path, noise_mean=0, noise_std=0.01):
+class DataGenerator(Dataset):
     """
-    Load a .npy file, apply a random rotation (90, 180, 270 degrees),
-    and add random Gaussian noise to the data.
-
-    Parameters:
-    file_path (str): Path to the .npy file to be loaded.
-    noise_mean (float): Mean of the Gaussian noise to be added. Default is 0.
-    noise_std (float): Standard deviation of the Gaussian noise to be added. Default is 0.01.
-
-    Returns:
-    tensor_scan (torch.Tensor): The processed image tensor.
+    Data Generator for loading batches of data.
     """
-    image = np.load(file_path)
 
-    rotate = random.choice([1, 2, 3])
-    image = np.rot90(image, k=rotate, axes=(0, 1))
-    noise = np.random.normal(noise_mean, noise_std, scan.shape)
+    def __init__(self, list_IDs, batch_size, path, scale, input_dim=(1, 400, 400), shuffle=True):
+        self.batch_size = batch_size
+        self.input_dim = input_dim
+        self.list_IDs = list_IDs
+        self.path = path 
+        self.shuffle = shuffle
+        self.on_epoch_end()
 
-    noisy_scan = image + noise
-    tensor_scan = torch.tensor(noisy_scan, dtype=torch.float32).unsqueeze(0)
+        # Load scaling factors
+        self.x_min = scale['x_min']
+        self.x_max = scale['x_max']
+        
+    def on_epoch_end(self):
+        # Updates indexes after each epoch.
+        self.indexes = np.arange(len(self.list_IDs))
+        if self.shuffle:
+            np.random.shuffle(self.indexes)
 
-    return tensor_scan
+    def __len__(self):
+        # Calculates the number of batches per epoch.
+       return int(np.floor(len(self.list_IDs) / self.batch_size))
 
+    def __getitem__(self, index):
+        # Generate one batch of data together with its indices
+        # Generate indexes of the batch.
+        indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
 
-def plot_2d_slice(data, slice_number):
-    """
-    Plot a 2D slice of a 3D CT scan.
+        # Find list of IDs.
+        list_IDs_temp = [self.list_IDs[k] for k in indexes]
 
-    Parameters:
-    data (numpy.ndarray): The 3D CT scan data.
-    slice_number (int): The slice number to be plotted.
+        # Generate data.
+        X, y = self.__data_generation(list_IDs_temp)
 
-    """
-    plt.imshow(data[slice_number + 1], cmap='gray')
-    plt.title(f'Slice {slice_number} of the CT Scan')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.show()
+        return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
+    def __data_generation(self, list_IDs_temp):
+        # Generates data containing batch_size samples.
+        X = np.empty((self.batch_size, *self.input_dim))
+        y = np.empty((self.batch_size, *self.input_dim))
+        
+        for i, list_ID in enumerate(list_IDs_temp):
+            try:
+                file_path = os.path.join(self.path, list_ID)
+                num_rot = np.random.randint(0, 3)
 
-if __name__ == '__main__':
-    folder = "lung_cts/"
-    for file in os.listdir(folder):
-        if not file.endswith(".npy"):
-            continue
+                # Store sample
+                file = np.load(file_path)
+                file = np.rot90(file, num_rot)
 
-        scan = np.load(os.path.join(folder, file))
-        print(file, scan.shape)
-        plot_2d_slice(scan, 150)
-        del scan
+                X[i,] = (file - self.x_min) / (self.x_max - self.x_min)
+                y[i,] = (file - self.x_min) / (self.x_max - self.x_min)
+
+            except Exception as e:
+                print(f'Error loading file {list_ID}: {e}')
+                continue
+
+        return X, y
