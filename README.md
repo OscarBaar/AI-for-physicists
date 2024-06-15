@@ -48,3 +48,6 @@ Each step is designed to be modular, allowing for adjustments and improvements s
 
 
 # Individual Contribution
+- Hamdi: model, training, finding right configurations
+- Lennard: preprocess.py and majority of inference.py, analyzing data
+- Oscar/Sergi: creating figures, presentation, analyzing data
