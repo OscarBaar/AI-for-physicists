@@ -2,16 +2,15 @@
 ---
 This project focuses on reducing the dimensionality of medical CT images using deep learning techniques. By employing an autoencoder architecture, we aim to compress these high-dimensional datasets into a smaller latent space, yielding faster and more efficient processing without significant loss of critical information
 
-# Authors
---- 
+## Authors
 - Hamdi Elsayed
 - Lennard Duynkerke
 - Oscar van Baar
 - Sergi van den Berg
 
 
-# Description
----
+## Description
+
 Utilizing an Autoencoder architecture, comprising a Convolutional Encoder and Decoder, the project reduces the dimensionality of these images while aiming to retain critical visual information.
 
 ### Workflow
@@ -27,14 +26,13 @@ Utilizing an Autoencoder architecture, comprising a Convolutional Encoder and De
 Each step is designed to be modular, allowing for adjustments and improvements such as different model architectures or loss functions (e.g., perceptual loss using VGG for enhanced visual fidelity). In the Usage section we provide a step-by-step guide on model setup, training and evaluation.
 
 # Usage
----
+
 
 
 # Contents
----
+
 
 ### blocks.py
-
 
 ### generator_correct.py
 
@@ -47,4 +45,3 @@ Each step is designed to be modular, allowing for adjustments and improvements s
 
 
 # Individual Contribution
----
