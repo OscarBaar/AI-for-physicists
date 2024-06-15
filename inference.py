@@ -164,7 +164,7 @@ def calculate_ssim(img1, img2, max_pixel_value=1.0, k1=0.01, k2=0.03):
     return ssim_map.mean()
 
 
-def infer_all(model, data_folder, df):
+def infer_all(model, data_folder, df, device):
     """
     Apply the model to all images from df,
 
@@ -172,6 +172,7 @@ def infer_all(model, data_folder, df):
         model (torch.model): The autoencoder model to be used for inference.
         data_folder (string): Folder containing the original images.
         df (pd.DataFrame): Information about the original images.
+        device (string): The device to use for prediction.
 
     Returns:
         None
@@ -184,7 +185,6 @@ def infer_all(model, data_folder, df):
         image = np.load(os.path.join(data_folder, file_name))
         image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
         image_tensor = preprocess_image(image)
-        device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # Get prediction
         prediction, encode_time, decode_time = get_prediction(model, image_tensor, device)
@@ -213,7 +213,7 @@ def infer_all(model, data_folder, df):
     print(f"Mean PSNR: {np.mean(psnr_list)}")
     print(f"Mean SSIM: {np.mean(ssim_list)}")
     print(f"Mean encode time: {np.mean(encode_times)} seconds")
-    print(f"Mean decode time: {np.mean(decode_time)} seconds")
+    print(f"Mean decode time: {np.mean(decode_times)} seconds")
 
     # Create DataFrame to store results along with inference times
     model_results = pd.DataFrame({
@@ -244,6 +244,15 @@ def plot_images(original_images, predictions, titles, file_info):
     Returns:
         None
     """
+    def extract_file_name(title):
+        """Extract file name from title"""
+        start = title.find('(') + 1
+        end = title.find(')', start)
+        if 0 < start < end:
+            file_name = title[start:end].strip().replace(' ', '_')
+            return file_name + '.jpg'
+        return None
+
     fig, axes = plt.subplots(2, 2, figsize=(12, 12))
     for i in range(len(original_images)):
         axes[i, 0].imshow(original_images[i], cmap='gray')
@@ -261,11 +270,11 @@ def plot_images(original_images, predictions, titles, file_info):
     plt.tight_layout()
     os.makedirs('results_2', exist_ok=True)
 
-    plt.savefig(os.path.join('results_2', f'{titles[i]}.jpg'))
+    plt.savefig(os.path.join(extract_file_name(titles[0])))
     plt.show()
 
 
-def plot_results(model, data_folder, file_df, results_df):
+def plot_results(model, data_folder, file_df, results_df, device):
     """
     Plots best and worst results of the model according to different parameters.
 
@@ -274,11 +283,11 @@ def plot_results(model, data_folder, file_df, results_df):
         data_folder (string): Folder containing the original images.
         file_df (pd.DataFrame): Information about the original images.
         results_df (pd.DataFrame): Information about the inference results.
+        device (string): The device to use for prediction.
 
     Returns:
         None
     """
-    device = "cuda" if torch.cuda.is_available() else "cpu"
     columns = results_df.columns
     num_images = 2
 
@@ -334,9 +343,10 @@ def plot_results(model, data_folder, file_df, results_df):
 def main():
     folder = "data_2d"
     weights = "best_model.pth"
+    device = 'cuda'
     encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
     decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
-    model = load_model(weights, encoder, decoder, device='cuda')
+    model = load_model(weights, encoder, decoder, device)
 
     # Load data
     data_df = pd.read_csv(os.path.join(folder, "file_info.csv"))
@@ -356,12 +366,12 @@ def main():
     print(len(test_df))
 
     # Apply inference to all images
-    infer_all(model, folder, test_df)
+    infer_all(model, folder, test_df, device)
 
     # Plot best and worst performing images
     model_results = pd.read_csv('model_results_2.csv')
     model_results = (model_results.merge(data_df, on='File_Name', how='left'))
-    plot_results(model, folder, test_df, model_results)
+    plot_results(model, folder, test_df, model_results, device)
     
     # Create scatterplots
     plt.figure()
