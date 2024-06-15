@@ -40,40 +40,52 @@ def perceptual_loss(output, target):
     return F.mse_loss(output_features, target_features)
 
 
-path = r"data_2d"
-data_df = pd.read_csv(os.path.join(path, "file_info.csv"))
-data_df = data_df[data_df["Max_Value"] > 300]
-scale = {'x_min': data_df["Min_Value"].min(), "x_max": data_df["Max_Value"].max()}
-listIDs = data_df['File_Name'].tolist()
+path = r"data_2d"  # Path to the data 
+data_df = pd.read_csv(os.path.join(path, "file_info.csv"))  # Looad in the pandas dataframe with all information about the training/test data/ 
+data_df = data_df[data_df["Max_Value"] > 300]  # Filter out the data that is not useful. i.e. data that contains no information.
+scale = {'x_min': data_df["Min_Value"].min(), "x_max": data_df["Max_Value"].max()}  #Defining the scaaling of the data.
+listIDs = data_df['File_Name'].tolist()  #Training IDs we are using in the DataGenerator.
+ 
+random.seed(333)  #Setting the seed for reproducibility.
+random.shuffle(listIDs) #Shuffling the list of IDs.
 
-random.seed(333)
-random.shuffle(listIDs)
-
-train_split = 0.7
-val_split = 0.15
+#Defining the split of the data into training, validation and test sets.
+train_split = 0.7  
+val_split = 0.15 
 test_split = 0.15
-trainIDs = listIDs[:int(round(train_split * len(listIDs)))]
-valIDs = listIDs[int(round(train_split * len(listIDs))):int(round((train_split + val_split) * len(listIDs)))]
-testIDs = listIDs[int(round((train_split + val_split) * len(listIDs))):]
 
+#Splitting the data into training, validation and test sets.
+trainIDs = listIDs[:int(round(train_split * len(listIDs)))] 
+valIDs = listIDs[int(round(train_split * len(listIDs))):int(round((train_split + val_split) * len(listIDs)))]
+testIDs = listIDs[int(round((train_split + val_split) * len(listIDs))):] 
+
+#Creating the DataGenerators for the training and validation sets.
 train_gen = DataGenerator(trainIDs, 10, path, scale)
 val_gen = DataGenerator(valIDs, 10, path, scale)
 
+
+#Creating the model, optimizer and scheduler.
 encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
 decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
 model = Autoencoder(encoder, decoder)
-optimizer = optim.Adam(model.parameters(), lr=5e-3)
-scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
+optimizer = optim.Adam(model.parameters(), lr=5e-3) 
+scheduler = StepLR(optimizer, step_size=5, gamma=0.5)  #Learning rate scheduler halves the learning rate every 5 epochs.
 
+#Defining the device to use for training.
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
+
+#Moving the model and VGG to the device.
 model.to(device)
 vgg.to(device)
 
 best_val_loss = float('inf')
-best_model_path = 'best_model.pth'
+best_model_path = 'best_model_average.pth'
 train_loss_list = []
 val_loss_list = []
+
+
+#Actually Training the moddel by iterating over the data for 50 epochs, both training and validation.
 for epoch in tqdm(range(50)):
     model.train()
     train_loss = 0
@@ -118,9 +130,9 @@ for epoch in tqdm(range(50)):
         torch.save(model.state_dict(), best_model_path)
         print('Model saved')
 
-    scheduler.step()
+    scheduler.step() #Step the learning rate scheduler
 
-with open("train_loss.pkl", "wb") as fp:
+with open("train_loss_average.pkl", "wb") as fp: #Save the training and validation loss to a pickle file.
     pickle.dump(train_loss_list, fp)
-with open("val_loss.pkl", "wb") as fp:
+with open("val_loss_average.pkl", "wb") as fp:
     pickle.dump(val_loss_list, fp)
