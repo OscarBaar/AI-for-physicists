@@ -1,36 +1,50 @@
-# AI-for-physicists
+# Project 6: Reduce Medical Data Dimensionality with Deep Learning
+---
+This project focuses on reducing the dimensionality of medical CT images using deep learning techniques. By employing an autoencoder architecture, we aim to compress these high-dimensional datasets into a smaller latent space, yielding faster and more efficient processing without significant loss of critical information
 
-## To-do's 
-For next Friday:
-- Initial training results
-- Initial inference results
-- Summary of problematic cases (what kind of images are difficult - general look, doesn't have to be really in-depth)
-- Summary of training + inference times.
- 
+# Authors
+--- 
+- Hamdi Elsayed
+- Lennard Duynkerke
+- Oscar van Baar
+- Sergi van den Berg
 
 
-## Table of Contents
+# Description
+---
+Utilizing an Autoencoder architecture, comprising a Convolutional Encoder and Decoder, the project reduces the dimensionality of these images while aiming to retain critical visual information.
 
-1. blocks.py
-Script that defines the building blocks of the model
+### Workflow
 
-2. generator_correct.py
-Script contaning 'DataGenerator' class, which is used for:
-* Loading and batching image data from disk for training and evaluation
-* Applying preprocessing steps like normalization or data augmentation (e.g. rotation) directly within data loading workflow
+1. Data Preprocessing: Transform the 3D CT image data into tensors suitable for model input. The medical scans are loaded and resampled to a uniform voxel spacing to ensure consistenciy in image scale and detail. Then the scans are resized to a standard 400x400x (x,y) dimensions, using padding or croping as necessary. These (still) 3D resized scans are split into 2D slices and saved individually.
 
-3. train.py
-Script handles training of the autoencoder model
-* Reads and prepares training and validation datasets
-* SEts up model, loss, optimizer and learning rate scheduler
-* Executres training loop, periodically validating validating model on a separate datatest to monitor performance
-* Saves best performing model
+2. Model Training: Use the Autoencoder architecture to train the model on a dataset of CT images, optimizing for minimal reconstruction error.
 
-4. inference.py
-Deployment of the model
-* Performs inference to generate predictions from input images
-* Evaluates the model's output by comparing predictions against ground truth data
+3. Inference and Evaluation: Apply the trained model to new CT images to assess the quality of reconstruction, quantified by metrics such as MSE, PSNR, SSIM.
 
-5. evaluate.py
-Evaluating the training model
-* Calculates and visualizes differences between the original images and their reconstructions to assess model's performance
+4. Result Visualization: Generate comparative visualizations between original and reconstructed images alongside performance metrics to validate model effectiveness.
+
+Each step is designed to be modular, allowing for adjustments and improvements such as different model architectures or loss functions (e.g., perceptual loss using VGG for enhanced visual fidelity). In the Usage section we provide a step-by-step guide on model setup, training and evaluation.
+
+# Usage
+---
+
+
+# Contents
+---
+
+### blocks.py
+
+
+### generator_correct.py
+
+
+### model.py
+
+### []
+
+### []
+
+
+# Individual Contribution
+---
