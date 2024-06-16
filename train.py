@@ -108,7 +108,7 @@ for epoch in range(num_epochs):
     current_lr = scheduler.get_last_lr()[0]  # Get the last learning rate
     print(f'Epoch {epoch+1}/{num_epochs}, Current learning rate: {current_lr}')
 
-with open("training/train_lossMSE", "wb") as fp:  # Pickling
+with open("training/train_lossMSE", "wb") as fp:  # Saving the training loss
     pickle.dump(train_loss_list, fp)
-with open("../val_lossMSE", "wb") as fp:  # Pickling
+with open("training/val_lossMSE", "wb") as fp:  #Saving the validation loss
     pickle.dump(val_loss_list, fp)

@@ -25,19 +25,19 @@ for param in vgg.parameters():
 
 # Define perceptual loss
 def perceptual_loss(output, target):
-    if output.size(1) == 1:
+    if output.size(1) == 1:  # If the output has only one channel, repeat it to 3 channels to match VGG16 input
         output = output.repeat(1, 3, 1, 1)
     if target.size(1) == 1:
         target = target.repeat(1, 3, 1, 1)
 
-    resize = transforms.Resize((224, 224))
+    resize = transforms.Resize((224, 224))  # Resize the output and target to 224x224
     output_resized = resize(output)
     target_resized = resize(target)
 
     output_features = vgg(output_resized)
     target_features = vgg(target_resized)
 
-    return F.mse_loss(output_features, target_features)
+    return F.mse_loss(output_features, target_features) # Compute the MSE loss between the output and target features
 
 
 path = r"data"  # Path to the data
