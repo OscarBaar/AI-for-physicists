@@ -7,7 +7,17 @@ from torch.utils.data import Dataset
 class DataGenerator(Dataset):
     """
     Data Generator for loading batches of data.
+
+    args:
+        list_IDs (list): List of all data IDs.
+        batch_size (int): Size of each batch.
+        path (str): Path to the directory containing the data files.
+        scale (dict): Dictionary containing the minimum and maximum Hounsfield units, used to scale the data between 0 and 1.
+        input_dim (tuple): Dimensions of the input data, standard is (1, 400, 400).
+        shuffle (bool): Whether to shuffle the data at the end of each epoch.
+       
     """
+
 
     def __init__(self, list_IDs, batch_size, path, scale, input_dim=(1, 400, 400), shuffle=True):
         self.batch_size = batch_size
@@ -32,7 +42,6 @@ class DataGenerator(Dataset):
        return int(np.floor(len(self.list_IDs) / self.batch_size))
 
     def __getitem__(self, index):
-        # Generate one batch of data together with its indices
         # Generate indexes of the batch.
         indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
 
@@ -54,7 +63,7 @@ class DataGenerator(Dataset):
                 file_path = os.path.join(self.path, list_ID)
                 num_rot = np.random.randint(0, 3) #We randomly rotate the image by 0, 90, 180 or 270 degrees this allows us to augment the data and have 4x the training examples.
 
-                # Store sample
+                # load file
                 file = np.load(file_path)
                 file = np.rot90(file, num_rot)
 
