@@ -40,7 +40,7 @@ def perceptual_loss(output, target):
     return F.mse_loss(output_features, target_features)
 
 
-path = r"../data"  # Path to the data
+path = r"data"  # Path to the data
 data_df = pd.read_csv(os.path.join(path, "file_info.csv"))  # Looad in the pandas dataframe with all information about the training/test data/ 
 data_df = data_df[data_df["Max_Value"] > 300]  # Filter out the data that is not useful. i.e. data that contains no information.
 scale = {'x_min': data_df["Min_Value"].min(), "x_max": data_df["Max_Value"].max()}  #Defining the scaaling of the data.
@@ -72,7 +72,7 @@ optimizer = optim.Adam(model.parameters(), lr=5e-3)
 scheduler = StepLR(optimizer, step_size=5, gamma=0.5)  #Learning rate scheduler halves the learning rate every 5 epochs.
 
 #Defining the device to use for training.
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu') #Change this to your device.
 print(device)
 
 #Moving the old_model and VGG to the device.
@@ -80,7 +80,7 @@ model.to(device)
 vgg.to(device)
 
 best_val_loss = float('inf')
-best_model_path = '../legacy_code/old_model/best_model_average.pth'
+best_model_path = 'Weights/ModelWeights_Perceptualloss.pth'
 train_loss_list = []
 val_loss_list = []
 
@@ -132,7 +132,7 @@ for epoch in tqdm(range(50)):
 
     scheduler.step() #Step the learning rate scheduler
 
-with open("../legacy_code/old_model/train_loss_average.pkl", "wb") as fp: #Save the training and validation loss to a pickle file.
+with open("training/train_lossPerceptual", "wb") as fp: #Save the training and validation loss to a pickle file.
     pickle.dump(train_loss_list, fp)
-with open("../legacy_code/old_model/val_loss_average.pkl", "wb") as fp:
+with open("training/train_lossPerceptual", "wb") as fp:
     pickle.dump(val_loss_list, fp)
