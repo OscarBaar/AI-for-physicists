@@ -16,7 +16,7 @@ def load_model(weights_path, encoder, decoder, device='cpu'):
     Function to load a pre-trained old_model.
 
     Parameters:
-        weights_path (string): Path to the old_model weights.
+        weights_path (string): Path to the model weights.
         encoder (torch.nn.Module): The encoder old_model.
         decoder (torch.nn.Module): The decoder old_model.
         device (string): The device to load the old_model on.
@@ -287,7 +287,7 @@ def plot_images(original_images, predictions, titles, file_info, output_dir):
 
     plt.tight_layout(rect=[0, 0, 0.9, 1])
     plt.savefig(os.path.join(output_dir, extract_file_name(titles[0])))
-    plt.show()
+    #plt.show() #uncomment if you want to see the results at the end of a run
 
 
 def plot_results(model, folder, file_df, results_df, device, output_dir):
@@ -405,13 +405,8 @@ def create_scatterplots(results, folder):
 def main():
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     data_folder = 'data'
-    results_folder = 'results_MSELoss'
-    import os
-
-# Define the name of the folder
-
-
-# Check if the folder exists
+    results_folder = 'results_PerceptualLoss'
+    # Check if the folder exists
     if not os.path.exists(results_folder):
     # If the folder does not exist, create it
         os.makedirs(results_folder)
@@ -424,7 +419,7 @@ def main():
         else:
             print("Proceeding with operations that may overwrite files in the existing folder.")
 
-    weights = os.path.join('Weights', 'ModelWeightsMSELoss.pth')
+    weights = os.path.join('Weights', 'ModelWeights_Perceptualloss.pth')
     encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
     decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
     model = load_model(weights, encoder, decoder, device)
