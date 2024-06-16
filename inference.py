@@ -8,6 +8,7 @@ from scipy.ndimage import gaussian_filter
 import time
 import random
 import matplotlib.pyplot as plt
+import json
 
 
 def load_model(weights_path, encoder, decoder, device='cpu'):
@@ -164,7 +165,7 @@ def calculate_ssim(img1, img2, max_pixel_value=1.0, k1=0.01, k2=0.03):
     return ssim_map.mean()
 
 
-def infer_all(model, folder, df, device):
+def infer_all(model, folder, df, device, output_dir):
     """
     Apply the old_model to all images from df,
 
@@ -228,10 +229,10 @@ def infer_all(model, folder, df, device):
         'Decode_Time': decode_times
     })
 
-    model_results.to_csv(os.path.join('results', 'model_results.csv'), index=False)
+    model_results.to_csv(os.path.join(output_dir, 'model_results.csv'), index=False)
 
 
-def plot_images(original_images, predictions, titles, file_info):
+def plot_images(original_images, predictions, titles, file_info, output_dir):
     """
     Plots best and worst results of the old_model according to different parameters.
 
@@ -253,13 +254,25 @@ def plot_images(original_images, predictions, titles, file_info):
             return file_name + '.jpg'
         return None
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 12))
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    
     for i in range(len(original_images)):
-        axes[i, 0].imshow(original_images[i], cmap='gray')
+        difference = predictions[i] - original_images[i]
+        v_min, v_max = -np.max(np.abs(difference)), np.max(np.abs(difference))
+        # Plot original image
+        im1 = axes[i, 0].imshow(original_images[i], cmap='gray', aspect='auto')
         axes[i, 0].set_title(f'Original - {titles[i]}')
-        axes[i, 1].imshow(predictions[i], cmap='gray')
-        axes[i, 1].set_title(f'Prediction - {titles[i]}')
+        axes[i, 0].axis('off')
 
+        # Plot prediction image
+        im2 = axes[i, 1].imshow(predictions[i], cmap='gray', aspect='auto')
+        axes[i, 1].set_title(f'Prediction - {titles[i]}')
+        axes[i, 1].axis('off')
+
+        # Plot difference using heatmap
+        im3 = axes[i, 2].imshow(difference, cmap='seismic', vmin=v_min, vmax=v_max, aspect='auto')
+        axes[i, 2].set_title(f'Difference - {titles[i]}')
+        axes[i, 2].axis('off')
         # Print variables and values aligned
         info = file_info[i]
         max_length = max(len(name) for name in info.keys())
@@ -267,17 +280,22 @@ def plot_images(original_images, predictions, titles, file_info):
             print(f'{name:<{max_length}}: {value}')
         print('\n')
 
-    plt.tight_layout()
-    plt.savefig(os.path.join('results', extract_file_name(titles[0])))
+    
+    cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])  # Right side colorbar
+    cbar = fig.colorbar(im3, cax=cbar_ax, orientation='vertical')
+    cbar.set_label('Difference', rotation=270, labelpad=15)
+
+    plt.tight_layout(rect=[0, 0, 0.9, 1])
+    plt.savefig(os.path.join(output_dir, extract_file_name(titles[0])))
     plt.show()
 
 
-def plot_results(model, folder, file_df, results_df, device):
+def plot_results(model, folder, file_df, results_df, device, output_dir):
     """
-    Plots best and worst results of the old_model according to different parameters.
+    Plots and stores best and worst results of the model according to different parameters.
 
     Parameters:
-        model (torch.old_model): The autoencoder old_model to be used for inference.
+        model (torch.model): The autoencoder model to be used for inference.
         folder (string): Folder containing the original images.
         file_df (pd.DataFrame): Information about the original images.
         results_df (pd.DataFrame): Information about the inference results.
@@ -288,6 +306,7 @@ def plot_results(model, folder, file_df, results_df, device):
     """
     columns = results_df.columns
     num_images = 2
+    results_storage = []
 
     for column in columns:
         if column == 'File_Name':
@@ -296,45 +315,39 @@ def plot_results(model, folder, file_df, results_df, device):
         highest_val = results_df.nlargest(num_images, column)
         lowest_val = results_df.nsmallest(num_images, column)
 
-        # Get results of highest values
-        images_high, predictions_high, titles_high, file_info_high = [], [], [], []
-        for idx, row in highest_val.iterrows():
-            file_name = row['File_Name']
-            image = np.load(os.path.join(folder, file_name))
-            image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
-            image_tensor = preprocess_image(image)
-            prediction, _, _ = get_prediction(model, image_tensor, device)
+        for data, label in [(highest_val, 'High'), (lowest_val, 'Low')]:
+            images, predictions, titles, file_infos = [], [], [], []
+            for idx, row in data.iterrows():
+                file_name = row['File_Name']
+                image = np.load(os.path.join(folder, file_name))
+                image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
+                image_tensor = preprocess_image(image)
+                prediction, _, _ = get_prediction(model, image_tensor, device)
 
-            images_high.append(image)
-            predictions_high.append(prediction[0, 0, :, :])
-            titles_high.append(f'{file_name} (High {column})')
+                images.append(image)
+                predictions.append(prediction[0, 0, :, :])  # Adjust this index if your prediction array shape is different
+                titles.append(f'{file_name} ({label} {column})')
 
-            file_info = {col: row[col] for col in results_df.columns}
-            file_info.update(file_df[file_df['File_Name'] == file_name].to_dict('records')[0])
-            file_info_high.append(file_info)
+                file_info = {col: row[col] for col in results_df.columns}
+                file_info.update(file_df[file_df['File_Name'] == file_name].to_dict('records')[0])
+                file_infos.append(file_info)
 
-        # Get results of lowest values
-        images_low, predictions_low, titles_low, file_info_low = [], [], [], []
-        for idx, row in lowest_val.iterrows():
-            file_name = row['File_Name']
-            image = np.load(os.path.join(folder, file_name))
-            image = (image - np.min(image)) / (np.max(image) - np.min(image))  # Normalization
-            image_tensor = preprocess_image(image)
-            prediction, _, _ = get_prediction(model, image_tensor, device)
+                result_details = {
+                    'type': label,
+                    'parameter': column,
+                    'file_name': file_name,
+                    'image': image,
+                    'prediction': prediction,
+                    'additional_info': file_info
+                }
+                results_storage.append(result_details)
 
-            images_low.append(image)
-            predictions_low.append(prediction[0, 0, :, :])
-            titles_low.append(f'{file_name} (Low {column})')
-
-            file_info = {col: row[col] for col in results_df.columns}
-            file_info.update(file_df[file_df['File_Name'] == file_name].to_dict('records')[0])
-            file_info_low.append(file_info)
-
-        # Plot images and print parameters
-        print(f'Plotting for parameter: {column}')
-        plot_images(images_high, predictions_high, titles_high, file_info_high)
-        plot_images(images_low, predictions_low, titles_low, file_info_low)
-
+            # Plot images and print parameters
+            print(f'Plotting for parameter: {column} ({label})')
+            plot_images(images, predictions, titles, file_infos, output_dir)
+    metadata_path = os.path.join(output_dir, 'results_metadata.json')
+    with open(metadata_path, 'w') as f:
+        json.dump(results_storage, f, indent=4, default=str)
 
 def create_scatterplots(results, folder):
     """
@@ -390,9 +403,9 @@ def create_scatterplots(results, folder):
 
 
 def main():
-    device = 'cuda'
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     data_folder = 'data'
-    results_folder = 'results'
+    results_folder = 'results3'
     weights = os.path.join('training', 'best_model.pth')
     encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
     decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
@@ -415,12 +428,12 @@ def main():
     test_df = data_df[data_df['File_Name'].isin(test_ids)]
 
     # Apply inference to all images
-    infer_all(model, data_folder, test_df, device)
+    infer_all(model, data_folder, test_df, device, results_folder)
 
     # Plot best and worst performing images
     model_results = pd.read_csv(os.path.join(results_folder, 'model_results.csv'))
     model_results = (model_results.merge(data_df, on='File_Name', how='left'))
-    plot_results(model, data_folder, test_df, model_results, device)
+    plot_results(model, data_folder, test_df, model_results, device, results_folder)
     
     # Scatterplots
     create_scatterplots(model_results, results_folder)
