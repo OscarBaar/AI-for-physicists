@@ -25,29 +25,31 @@ Utilizing an Autoencoder architecture, comprising a Convolutional Encoder and De
 
 Each step is designed to be modular, allowing for adjustments and improvements such as different model architectures or loss functions (e.g., perceptual loss using VGG for enhanced visual fidelity). In the Usage section we provide a step-by-step guide on model setup, training and evaluation.
 
-# Usage
 
+## Contents
 
+- *data:* Folder containing preprocessed 2D slices to be used to train the model.
+- *lung_cts:* Folder with the provided, unprocessed 3D CT images
+- *results:* Folder containing plots and images that visualize the accuracy and performance of the model.
+- *src:* Folder containing source code of the model.
+  - blocks.py: blocks like encoder, decoder, and autoencoder used in the model.
+  - generator.py: file that defines the datagenerator
+  - model.py: file that defines the autoencoder
+- *training:* Folder containing files related to the training of the model.
+- *Weights:* The weights of the trained model are saved here 
+- *preprocess.py:* File used to transform raw data into 2D images that can be used as input data for the model.
+- *inference.py:* Script that uses the trained model to encode and decode the test CT images and peforms various performance assessments (MSE, PSNR, and SSIM). It also included functions to load and preprocess image data, execute inference and visualize the outcomes through scatter plots and comparison images
+- *train.py:* Script that trains the model using MSE loss. Splits data into training, validation, and testing sets and saves the training and validation losses for performance analysis
+- *train_perceptual_loss.py:*  Same as train.py, but now a pre-trained VGG16 model is used to implement perceptual loss during the training of the autoenconder
 
-# Contents
+## Usage
 
-- **data:** folder containing preprocessed 2D slices to be used to train the model.
-- **results:** folder containing plots and images that visualize the accuracy and performance of the model.
-- **src:** folder containing source code of the model.
-  - *blocks.py:* blocks like encoder, decoder, and autoencoder used in the model.
-  - *generator.py:* Contains the data generator which loads the data into the model.
-  - *model.py:* ...
-- **training:** folder containing files related to the training of the model. 
-  - *train.py:* ...
-  - *train_perceptual_loss.py:* ...
-  - *best_model.pth:* ...
-  - *train_loss.pkl:* ...
-  - *val_loss.pkl:* ...
-- **preprocess.py:** file used to transform raw data into 2D images that can be used as input data for the model.
-- **inference.py:**
+The train.py / train_perceptual_loss.py scripts facilitate the training and validation of a deep learning model (using perceptual loss). This script trains the model on images from the 'data' directory, and data splits the data into training, validation, and test sets. During training, the script dynamically adjusts learning rates and continuously evaluates the model against the validation set, saving the model weights to 'Weights/' whenever an improvement in validation loss is observed.
 
+Upon completion of the training phase, the model can be used in inference.py to perform inference on the 'test' subset of the data. This involves encoding and decoding images using the trained autoencoder to assess the quality of image reconstruction. The script also generates performance metrics such as PSNR and SSIM, which are saved for further analysis. Additionally, various performance assessment figures are generated and saved, providing visual and quantitative insights into the model's effectiveness.
 
-# Individual Contribution
-- Hamdi: model, training, finding right configurations
+## Individual Contribution
+- Hamdi: model, train.py, finding right configurations
 - Lennard: preprocess.py and majority of inference.py, analyzing data
-- Oscar/Sergi: creating figures, presentation, analyzing data
+- Oscar: creating figures, presentation, analyzing data
+- Sergi: train_perceptual_loss.py, analyzing data, presentation
