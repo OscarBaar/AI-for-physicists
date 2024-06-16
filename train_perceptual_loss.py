@@ -25,22 +25,22 @@ for param in vgg.parameters():
 
 # Define perceptual loss
 def perceptual_loss(output, target):
-    if output.size(1) == 1:
+    if output.size(1) == 1:  # If the output has only one channel, repeat it to 3 channels to match VGG16 input
         output = output.repeat(1, 3, 1, 1)
     if target.size(1) == 1:
         target = target.repeat(1, 3, 1, 1)
 
-    resize = transforms.Resize((224, 224))
+    resize = transforms.Resize((224, 224))  # Resize the output and target to 224x224
     output_resized = resize(output)
     target_resized = resize(target)
 
     output_features = vgg(output_resized)
     target_features = vgg(target_resized)
 
-    return F.mse_loss(output_features, target_features)
+    return F.mse_loss(output_features, target_features) # Compute the MSE loss between the output and target features
 
 
-path = r"../data"  # Path to the data
+path = r"data"  # Path to the data
 data_df = pd.read_csv(os.path.join(path, "file_info.csv"))  # Looad in the pandas dataframe with all information about the training/test data/ 
 data_df = data_df[data_df["Max_Value"] > 300]  # Filter out the data that is not useful. i.e. data that contains no information.
 scale = {'x_min': data_df["Min_Value"].min(), "x_max": data_df["Max_Value"].max()}  #Defining the scaaling of the data.
@@ -68,11 +68,15 @@ val_gen = DataGenerator(valIDs, 10, path, scale)
 encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
 decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
 model = Autoencoder(encoder, decoder)
+
+
+
+#Learning rate scheduler halves the learning rate every 5 epochs.  
 optimizer = optim.Adam(model.parameters(), lr=5e-3) 
-scheduler = StepLR(optimizer, step_size=5, gamma=0.5)  #Learning rate scheduler halves the learning rate every 5 epochs.
+scheduler = StepLR(optimizer, step_size=5, gamma=0.5)  
 
 #Defining the device to use for training.
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu') #Change this to your device.
 print(device)
 
 #Moving the old_model and VGG to the device.
@@ -80,7 +84,7 @@ model.to(device)
 vgg.to(device)
 
 best_val_loss = float('inf')
-best_model_path = '../legacy_code/old_model/best_model_average.pth'
+best_model_path = 'Weights/ModelWeights_Perceptualloss.pth'
 train_loss_list = []
 val_loss_list = []
 
@@ -132,7 +136,7 @@ for epoch in tqdm(range(50)):
 
     scheduler.step() #Step the learning rate scheduler
 
-with open("../legacy_code/old_model/train_loss_average.pkl", "wb") as fp: #Save the training and validation loss to a pickle file.
+with open("training/train_lossPerceptual", "wb") as fp: #Save the training and validation loss to a pickle file.
     pickle.dump(train_loss_list, fp)
-with open("../legacy_code/old_model/val_loss_average.pkl", "wb") as fp:
+with open("training/train_lossPerceptual", "wb") as fp:
     pickle.dump(val_loss_list, fp)

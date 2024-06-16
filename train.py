@@ -12,7 +12,7 @@ from torch.optim.lr_scheduler import StepLR
 batch_size = 10
 num_epochs = 50
 
-path = r"../data"
+path = r"data"
 data_df = pd.read_csv(os.path.join(path, "file_info.csv"))
 
 data_df = data_df[data_df["Max_Value"] > 300]
@@ -48,7 +48,7 @@ device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
 best_val_loss = float('inf')
-best_model_path = 'best_model.pth'
+best_model_path = 'Weights/ModelWeightsMSELoss.pth'
 
 print(f'Number of training batches: {len(train_gen)}')
 print(f'Number of validation batches: {len(val_gen)}')
@@ -108,7 +108,7 @@ for epoch in range(num_epochs):
     current_lr = scheduler.get_last_lr()[0]  # Get the last learning rate
     print(f'Epoch {epoch+1}/{num_epochs}, Current learning rate: {current_lr}')
 
-with open("../train_loss", "wb") as fp:  # Pickling
+with open("training/train_lossMSE", "wb") as fp:  # Saving the training loss
     pickle.dump(train_loss_list, fp)
-with open("../val_loss", "wb") as fp:  # Pickling
+with open("training/val_lossMSE", "wb") as fp:  #Saving the validation loss
     pickle.dump(val_loss_list, fp)
