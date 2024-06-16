@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/home/hamdielsayed/AI-for-physicists/training/train_perceptual_loss.py", line 14, in <module>
-    from src.generator import DataGenerator
-ModuleNotFoundError: No module named 'src'

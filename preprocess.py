@@ -4,7 +4,7 @@ import os
 import SimpleITK as sitk
 
 
-def resize_scan(scan, target_size=400, pad_value=-1024):
+def resize_scan(scan, target_size=400, pad_value=-1000):
     """
     Resize a 3D numpy array in the x and y dimensions to a fixed size.
     Smaller arrays are padded with a specified value, larger arrays are cropped.

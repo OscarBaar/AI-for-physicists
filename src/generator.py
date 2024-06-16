@@ -17,7 +17,7 @@ class DataGenerator(Dataset):
         self.shuffle = shuffle
         self.on_epoch_end()
 
-        # Load scaling factors
+        # Load scaling factors so we normalize the input data
         self.x_min = scale['x_min']
         self.x_max = scale['x_max']
         
@@ -52,14 +52,14 @@ class DataGenerator(Dataset):
         for i, list_ID in enumerate(list_IDs_temp):
             try:
                 file_path = os.path.join(self.path, list_ID)
-                num_rot = np.random.randint(0, 3)
+                num_rot = np.random.randint(0, 3) #We randomly rotate the image by 0, 90, 180 or 270 degrees this allows us to augment the data and have 4x the training examples.
 
                 # Store sample
                 file = np.load(file_path)
                 file = np.rot90(file, num_rot)
 
-                X[i,] = (file - self.x_min) / (self.x_max - self.x_min)
-                y[i,] = (file - self.x_min) / (self.x_max - self.x_min)
+                X[i,] = (file - self.x_min) / (self.x_max - self.x_min)  #Normalize the input data
+                y[i,] = (file - self.x_min) / (self.x_max - self.x_min)  #Normalize the target data 
 
             except Exception as e:
                 print(f'Error loading file {list_ID}: {e}')

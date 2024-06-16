@@ -68,8 +68,12 @@ val_gen = DataGenerator(valIDs, 10, path, scale)
 encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
 decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
 model = Autoencoder(encoder, decoder)
+
+
+
+#Learning rate scheduler halves the learning rate every 5 epochs.  
 optimizer = optim.Adam(model.parameters(), lr=5e-3) 
-scheduler = StepLR(optimizer, step_size=5, gamma=0.5)  #Learning rate scheduler halves the learning rate every 5 epochs.
+scheduler = StepLR(optimizer, step_size=5, gamma=0.5)  
 
 #Defining the device to use for training.
 device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu') #Change this to your device.
