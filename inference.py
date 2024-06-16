@@ -405,8 +405,26 @@ def create_scatterplots(results, folder):
 def main():
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     data_folder = 'data'
-    results_folder = 'results3'
-    weights = os.path.join('training', 'best_model.pth')
+    results_folder = 'results_MSELoss'
+    import os
+
+# Define the name of the folder
+
+
+# Check if the folder exists
+    if not os.path.exists(results_folder):
+    # If the folder does not exist, create it
+        os.makedirs(results_folder)
+        print(f"Folder '{results_folder}' created.")
+    else:
+    # Prompt the user to confirm overwrite
+        response = input(f"Folder '{results_folder}' already exists. Do you want to continue and possibly overwrite files? (yes/no): ")
+        if response.lower() != 'yes':
+            raise Exception("Operation cancelled by user to avoid potential file overwrite.")
+        else:
+            print("Proceeding with operations that may overwrite files in the existing folder.")
+
+    weights = os.path.join('Weights', 'ModelWeightsMSELoss.pth')
     encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
     decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
     model = load_model(weights, encoder, decoder, device)
