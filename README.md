@@ -29,18 +29,16 @@ Each step is designed to be modular, allowing for adjustments and improvements s
 ## Contents
 
 - *data:* Folder containing preprocessed 2D slices to be used to train the model.
-- *lung_cts:* Folder with the provided, unprocessed 3D CT images
 - *results:* Folder containing plots and images that visualize the accuracy and performance of the model.
 - *src:* Folder containing source code of the model.
   - blocks.py: blocks like encoder, decoder, and autoencoder used in the model.
   - generator.py: file that defines the datagenerator
-  - model.py: file that defines the autoencoder
 - *training:* Folder containing files related to the training of the model.
-- *Weights:* The weights of the trained model are saved here 
+  - *train.py:* Script that trains the model using MSE loss. Splits data into training, validation, and testing sets and saves the training and validation losses for performance analysis
+  - *train_perceptual_loss.py:*  Same as train.py, but now a pre-trained VGG16 model is used to implement perceptual loss during the training of the autoenconder
+- *weights:* The weights of the trained model are saved here 
 - *preprocess.py:* File used to transform raw data into 2D images that can be used as input data for the model.
 - *inference.py:* Script that uses the trained model to encode and decode the test CT images and peforms various performance assessments (MSE, PSNR, and SSIM). It also included functions to load and preprocess image data, execute inference and visualize the outcomes through scatter plots and comparison images
-- *train.py:* Script that trains the model using MSE loss. Splits data into training, validation, and testing sets and saves the training and validation losses for performance analysis
-- *train_perceptual_loss.py:*  Same as train.py, but now a pre-trained VGG16 model is used to implement perceptual loss during the training of the autoenconder
 
 ## Usage
 

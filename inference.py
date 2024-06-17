@@ -419,7 +419,7 @@ def main():
         else:
             print("Proceeding with operations that may overwrite files in the existing folder.")
 
-    weights = os.path.join('Weights', 'ModelWeights_Perceptualloss.pth')
+    weights = os.path.join('weights', 'weights_perceptual_loss.pth')
     encoder = ConvEncoder(num_channels=64, kernel_size=5, strides=1, pooling=2)
     decoder = ConvDecoder(num_channels=64, kernel_size=5, strides=2)
     model = load_model(weights, encoder, decoder, device)

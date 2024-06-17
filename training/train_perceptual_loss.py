@@ -40,7 +40,7 @@ def perceptual_loss(output, target):
     return F.mse_loss(output_features, target_features) # Compute the MSE loss between the output and target features
 
 
-path = r"data"  # Path to the data
+path = r"../data"  # Path to the data
 data_df = pd.read_csv(os.path.join(path, "file_info.csv"))  # Looad in the pandas dataframe with all information about the training/test data/ 
 data_df = data_df[data_df["Max_Value"] > 300]  # Filter out the data that is not useful. i.e. data that contains no information.
 scale = {'x_min': data_df["Min_Value"].min(), "x_max": data_df["Max_Value"].max()}  #Defining the scaaling of the data.
@@ -84,7 +84,7 @@ model.to(device)
 vgg.to(device)
 
 best_val_loss = float('inf')
-best_model_path = 'Weights/ModelWeights_Perceptualloss.pth'
+best_model_path = '../weights/weights_perceptual_loss.pth'
 train_loss_list = []
 val_loss_list = []
 

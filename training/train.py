@@ -12,7 +12,7 @@ from torch.optim.lr_scheduler import StepLR
 batch_size = 10
 num_epochs = 50
 
-path = r"data"
+path = r"../data"
 data_df = pd.read_csv(os.path.join(path, "file_info.csv"))
 
 data_df = data_df[data_df["Max_Value"] > 300]
@@ -48,7 +48,7 @@ device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
 best_val_loss = float('inf')
-best_model_path = 'Weights/ModelWeightsMSELoss.pth'
+best_model_path = '../weights/weights_MSE_loss.pth'
 
 print(f'Number of training batches: {len(train_gen)}')
 print(f'Number of validation batches: {len(val_gen)}')
@@ -73,7 +73,6 @@ for epoch in range(num_epochs):
         batch_loss = loss.item()
         train_loss += batch_loss * inputs.size(0)
         total_train_samples += inputs.size(0)
-        #print(f'Batch {batch_idx + 1}/{len(train_gen)}, Train Loss: {batch_loss:.4f}')
 
     train_loss /= total_train_samples
     print(f'Epoch {epoch+1} training completed. Average Train Loss: {train_loss:.4f}')
@@ -93,7 +92,6 @@ for epoch in range(num_epochs):
             batch_loss = loss.item()
             val_loss += batch_loss * inputs.size(0)
             total_val_samples += inputs.size(0)
-            #print(f'Batch {batch_idx + 1}/{len(val_gen)}, Val Loss: {batch_loss:.4f}')
 
     val_loss /= total_val_samples
     print(f'Epoch {epoch+1}, Average Val Loss: {val_loss:.4f}')
@@ -108,7 +106,7 @@ for epoch in range(num_epochs):
     current_lr = scheduler.get_last_lr()[0]  # Get the last learning rate
     print(f'Epoch {epoch+1}/{num_epochs}, Current learning rate: {current_lr}')
 
-with open("training/train_lossMSE", "wb") as fp:  # Saving the training loss
+with open("train_loss_MSE", "wb") as fp:  # Saving the training loss
     pickle.dump(train_loss_list, fp)
-with open("training/val_lossMSE", "wb") as fp:  #Saving the validation loss
+with open("val_loss_MSE", "wb") as fp:  # Saving the validation loss
     pickle.dump(val_loss_list, fp)
